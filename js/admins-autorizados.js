@@ -32,11 +32,11 @@ export function adicionarAdmin(email) {
     
     if (!ADMINS_AUTORIZADOS.includes(emailNormalizado)) {
         ADMINS_AUTORIZADOS.push(emailNormalizado);
-        console.log(`✅ Admin adicionado: ${emailNormalizado}`);
+        console.log(`Admin adicionado: ${emailNormalizado}`);
         return true;
     }
     
-    console.log(`ℹ️ E-mail já está na lista: ${emailNormalizado}`);
+    console.log(`ℹE-mail já está na lista: ${emailNormalizado}`);
     return false;
 }
 
@@ -55,11 +55,11 @@ export function removerAdmin(email) {
     
     if (index !== -1) {
         ADMINS_AUTORIZADOS.splice(index, 1);
-        console.log(`✅ Admin removido: ${emailNormalizado}`);
+        console.log(`Admin removido: ${emailNormalizado}`);
         return true;
     }
     
-    console.log(`❌ E-mail não encontrado: ${emailNormalizado}`);
+    console.log(`E-mail não encontrado: ${emailNormalizado}`);
     return false;
 }
 
