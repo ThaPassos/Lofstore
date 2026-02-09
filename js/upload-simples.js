@@ -6,8 +6,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 let arquivoAtual = null;
-let urlImagemAtual = '';
-
+let urlImagemAtual = ''; // 
 // Configura o upload de imagem
 export function configurarUploadSimples() {
   const inputImagem = document.getElementById('upload-imagem');
@@ -16,7 +15,7 @@ export function configurarUploadSimples() {
   const status = document.getElementById('status-upload');
   
   // Evento quando seleciona imagem
-  inputImagem.addEventListener('change', function(e) {
+  inputImagem.addEventListener('change', async function(e) {
     const arquivo = e.target.files[0];
     if (!arquivo) return;
     
@@ -26,32 +25,80 @@ export function configurarUploadSimples() {
       return;
     }
     
-    if (arquivo.size > 15 * 1024 * 1024) { 
-      mostrarStatus('Imagem muito grande (máx: 5MB)', 'erro');
+    if (arquivo.size > 20 * 1024 * 1024) { 
+      mostrarStatus('Imagem muito grande (máx: 20MB)', 'erro');
       return;
     }
+
+    // Agora comprime apenas se for maior que 2MB
+    if (arquivo.size > 2 * 1024 * 1024) { // Se maior que 2MB
+      mostrarStatus('Otimizando imagem...', 'info');
+      arquivoAtual = await comprimirImagem(arquivo);
+      mostrarStatus(`Imagem otimizada (${(arquivoAtual.size / 1024).toFixed(0)}KB)`, 'sucesso');
+    } else {
+      arquivoAtual = arquivo;
+    }
     
-    arquivoAtual = arquivo;
-    
-    // Mostra preview
     const reader = new FileReader();
     reader.onload = function(e) {
-      urlImagemAtual = e.target.result;
-      preview.src = urlImagemAtual;
+      preview.src = e.target.result; // base64 só pro preview
       preview.style.display = 'block';
       semImagem.style.display = 'none';
+      
+      const btnRemover = document.querySelector('.btn-remover-imagem');
+      if (btnRemover) btnRemover.style.display = 'block';
+      
       mostrarStatus('Imagem pronta para salvar', 'sucesso');
     };
-    reader.readAsDataURL(arquivo);
+    reader.readAsDataURL(arquivoAtual);
   });
   
   // Adiciona botão para remover imagem
   adicionarBotaoRemover();
 }
 
+async function comprimirImagem(arquivo, maxWidth = 1920, qualidade = 0.85) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Redimensiona proporcionalmente se necessário
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Converte para blob com compressão
+        canvas.toBlob((blob) => {
+          resolve(new File([blob], arquivo.name, {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+          }));
+        }, 'image/jpeg', qualidade);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(arquivo);
+  });
+}
+
 // Adiciona botão para remover imagem
 function adicionarBotaoRemover() {
   const secaoImagem = document.querySelector('.secao-imagem');
+  if (!secaoImagem) return;
+  
+  // Evita adicionar múltiplos botões
+  if (document.querySelector('.btn-remover-imagem')) return;
   
   const btnRemover = document.createElement('button');
   btnRemover.type = 'button';
@@ -71,16 +118,16 @@ function removerImagemSelecionada() {
   const inputImagem = document.getElementById('upload-imagem');
   const preview = document.getElementById('imagem-preview');
   const semImagem = document.getElementById('sem-imagem');
-  const status = document.getElementById('status-upload');
   const btnRemover = document.querySelector('.btn-remover-imagem');
   
   inputImagem.value = '';
   arquivoAtual = null;
-  urlImagemAtual = '';
+  urlImagemAtual = ''; // Limpa a URL também
   
   preview.style.display = 'none';
+  preview.src = ''; // Limpa o src
   semImagem.style.display = 'block';
-  btnRemover.style.display = 'none';
+  if (btnRemover) btnRemover.style.display = 'none';
   
   mostrarStatus('Imagem removida', 'sucesso');
 }
@@ -88,15 +135,16 @@ function removerImagemSelecionada() {
 // Mostra mensagem de status
 function mostrarStatus(mensagem, tipo = 'info') {
   const status = document.getElementById('status-upload');
+  if (!status) return;
+  
   status.innerHTML = `<span class="status-${tipo}">${mensagem}</span>`;
   status.style.display = 'block';
 }
 
-// Faz upload da imagem para Firebase Storage
 export async function uploadImagemParaFirebase(produtoId) {
   if (!arquivoAtual) {
-    // Se não tem nova imagem, retorna a URL atual (se houver)
-    return document.getElementById('produto-imagem').value || '';
+
+    return urlImagemAtual || '';
   }
   
   const status = document.getElementById('status-upload');
@@ -112,14 +160,16 @@ export async function uploadImagemParaFirebase(produtoId) {
     
     // Mostra status de carregamento
     mostrarStatus('Enviando imagem...', 'carregando');
-    btnRemover.style.display = 'none';
+    if (btnRemover) btnRemover.style.display = 'none';
     
     // Cria barra de progresso
-    status.innerHTML += `
-      <div class="progress-container">
-        <div class="progress-bar" id="progress-bar"></div>
-      </div>
-    `;
+    if (status) {
+      status.innerHTML += `
+        <div class="progress-container">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+      `;
+    }
     
     // Faz upload
     const uploadTask = uploadBytesResumable(storageRef, arquivoAtual);
@@ -136,15 +186,16 @@ export async function uploadImagemParaFirebase(produtoId) {
         },
         (error) => {
           mostrarStatus(`Erro: ${error.message}`, 'erro');
-          btnRemover.style.display = 'block';
+          if (btnRemover) btnRemover.style.display = 'block';
           reject(error);
         },
         async () => {
-          // Upload completo - pega URL
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           
+          urlImagemAtual = downloadURL;
+          
           mostrarStatus('Imagem enviada com sucesso!', 'sucesso');
-          btnRemover.style.display = 'block';
+          if (btnRemover) btnRemover.style.display = 'block';
           
           // Limpa o arquivo atual após upload bem-sucedido
           arquivoAtual = null;
@@ -162,21 +213,28 @@ export async function uploadImagemParaFirebase(produtoId) {
   }
 }
 
-// Preenche imagem existente no modal
+
 export function preencherImagemExistente(urlImagem) {
   const preview = document.getElementById('imagem-preview');
   const semImagem = document.getElementById('sem-imagem');
   const btnRemover = document.querySelector('.btn-remover-imagem');
   
   if (urlImagem) {
-    preview.src = urlImagem;
+    preview.src = urlImagem; // URL do Storage
     preview.style.display = 'block';
     semImagem.style.display = 'none';
-    btnRemover.style.display = 'block';
+    if (btnRemover) btnRemover.style.display = 'block';
+    
     urlImagemAtual = urlImagem;
   } else {
     preview.style.display = 'none';
+    preview.src = '';
     semImagem.style.display = 'block';
-    btnRemover.style.display = 'none';
+    if (btnRemover) btnRemover.style.display = 'none';
+    urlImagemAtual = '';
   }
+}
+
+export function getUrlImagemAtual() {
+  return urlImagemAtual;
 }
