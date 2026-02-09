@@ -800,7 +800,7 @@
     
     if (!adminLogado || adminLogado !== 'true' || !adminEmail) {
         console.log('Não logado, redirecionando para login...');
-        window.location.href = 'login.html';
+        window.location.href = 'login-usuario.html';
     } else {
         console.log('Usuário logado como:', adminEmail);
         document.addEventListener('DOMContentLoaded', function() {
@@ -946,7 +946,7 @@
         if (confirm('Deseja sair do painel admin?')) {
             localStorage.removeItem('adminLogado');
             localStorage.removeItem('adminEmail');
-            window.location.href = 'login.html';
+            window.location.href = 'login-usuario.html';
         }
     }
 
