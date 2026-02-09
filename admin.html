@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - LofStore</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Raleway", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 200;
+            font-style: normal;
+        }
+        
+        body {
+            background: #f8f3f3;
+            color: #333;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 50px;
+            background-color: #f8f3f3;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: background-color 0.4s ease, padding 0.4s ease;
+        }
+
+        .logo img {
+            height: 90px;
+        }
+
+        /* ======== MENU DESKTOP ======== */
+        .menu-desktop {
+            display: flex;
+        }
+
+        .menu-desktop ul {
+            list-style: none;
+            display: flex;
+            gap: 40px;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+        }
+
+        .menu-desktop a {
+            text-decoration: none;
+            color: #b52d1e;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .principais {
+            color: #b52d1e;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding-bottom: 5px;
+            font-size: 15px;
+        }
+
+        .menu-desktop a:hover {
+            color: #b85c5c;
+        }
+
+        /* ======== ÁREA DIREITA (USER INFO + HAMBURGER) ======== */
+        .navbar-direita {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info span {
+            color: #b52d1e;
+            font-weight: 600;
+        }
+        
+        .btn-logout {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        /* ======== BOTÃO HAMBÚRGUER ======== */
+        .hamburger {
+            display: none;
+            position: relative;
+            width: 36px;
+            height: 36px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1001;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .hamburger span {
+            width: 24px;
+            height: 3px;
+            background-color: #b52d1e;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translateY(8px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translateY(-8px);
+        }
+
+        /* ======== MENU MOBILE OVERLAY ======== */
+        .menu-mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .menu-mobile-overlay.ativo {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .menu-mobile-container {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 100%;
+            background: #f8f3f3;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            z-index: 10000;
+            padding: 60px 20px 20px;
+        }
+
+        .menu-mobile-overlay.ativo .menu-mobile-container {
+            right: 0;
+        }
+
+        .btn-fechar-menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 40px;
+            color: #b52d1e;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .menu-mobile-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-mobile-nav li {
+            margin-bottom: 5px;
+        }
+
+        .link-mobile {
+            display: block;
+            padding: 15px 20px;
+            color: #b52d1e;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .link-mobile:hover {
+            background: #b52d1e;
+            color: white;
+        }
+
+        /* User info no mobile */
+        .user-info-mobile {
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .user-info-mobile span {
+            display: block;
+            color: #b52d1e;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .btn-logout-mobile {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .btn-logout-mobile:hover {
+            background: #d32f2f;
+        }
+
+        /* ======== NAVBAR AO SCROLL ======== */
+        .navbar.scrolled {
+            background-color: #b52d1e;
+        }
+
+        .navbar.scrolled .logo img {
+            content: url("imagens/logo2a.png");
+            height: 85px;
+        }
+
+        .navbar.scrolled .principais,
+        .navbar.scrolled .user-info span {
+            color: #f8f3f3;
+        }
+
+        .navbar.scrolled .btn-logout {
+            background: #f8f3f3;
+            color: #b52d1e;
+        }
+
+        .navbar.scrolled .btn-logout:hover {
+            background: #e0e0e0;
+        }
+
+        .navbar.scrolled .hamburger span {
+            background-color: #f8f3f3;
+        }
+        
+        /* ======== CONTAINER PRINCIPAL ======== */
+        .container {
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .btn-voltar {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: #b52d1e;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+
+        .btn-voltar:hover {
+            gap: 15px;
+            color: #9a2519;
+        }
+        
+        /* ======== CARD DO FORMULÁRIO ======== */
+        .card {
+            background-color: transparent;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        /* ======== FORMULÁRIO ======== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-group:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #b52d1e;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            border: none;
+            outline: none;
+            background: none;
+            padding: 8px 0;
+            font-size: 16px;
+            width: 100%;
+            color: #333;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            padding: 12px 0;
+        }
+        
+        .form-group input::placeholder,
+        .form-group textarea::placeholder,
+        .form-group select:invalid {
+            color: #b52d1ebb;
+            opacity: 1;
+        }
+        
+        .form-group select {
+            appearance: none;
+            cursor: pointer;
+            background: transparent;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .form-group select option {
+            color: #333;
+            background: white;
+        }
+        
+        .form-group select option:first-child {
+            color: #b52d1e;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* ======== CHECKBOXES DE CATEGORIAS ======== */
+        .categorias-container {
+            grid-column: 1 / -1;
+            margin-bottom: 25px;
+        }
+
+        .categorias-container label.label-titulo {
+            display: block;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .categorias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .categoria-checkbox {
+            position: relative;
+        }
+
+        .categoria-checkbox input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .categoria-checkbox label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .categoria-checkbox label::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #b52d1e;
+            border-radius: 4px;
+            background: white;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .categoria-checkbox input[type="checkbox"]:checked + label::before {
+            background: #b52d1e;
+            border-color: #b52d1e;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/%3E%3C/svg%3E");
+            background-size: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .categoria-checkbox label:hover {
+            border-color: #b52d1e;
+            background: #fff5f3;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(181, 45, 30, 0.1);
+        }
+
+        .categoria-checkbox input[type="checkbox"]:checked + label {
+            background: linear-gradient(135deg, #b52d1e 0%, #d63a2b 100%);
+            border-color: #b52d1e;
+            color: white;
+            font-weight: 600;
+        }
+
+        .categorias-info {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #1976D2;
+            display: none;
+        }
+
+        .categorias-info.mostrar {
+            display: block;
+        }
+        
+        /* ======== ÁREA DE UPLOAD ======== */
+        .upload-area {
+            border: 2px dashed #b52d1e;
+            border-radius: 8px;
+            padding: 25px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(181, 45, 30, 0.05);
+            grid-column: 1 / -1;
+            margin-top: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .upload-area:hover {
+            background: rgba(181, 45, 30, 0.1);
+            border-color: #9d2619;
+        }
+        
+        .upload-area p {
+            color: #b52d1e;
+            margin: 8px 0;
+        }
+        
+        .upload-area p:first-child {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .upload-area p:last-child {
+            font-size: 12px;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+        
+        /* ======== PREVIEW DA IMAGEM ======== */
+        .image-preview-container {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .image-preview {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .btn-remove-image {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: none;
+            margin: 10px auto;
+            transition: all 0.3s;
+        }
+        
+        .btn-remove-image:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+        
+        /* ======== BOTÕES ======== */
+        .btn-save {
+            background: #b52d1e;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-save:hover {
+            background: #9d2619;
+            transform: translateY(-2px);
+        }
+        
+        .btn-save:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .admin-shortcuts {
+            text-align: center;
+            margin: 30px auto;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+        
+        .btn-categorias {
+            background: #b52d1e;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 400px;
+            margin-top: 20px;
+            height: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+        
+        .btn-categorias:hover {
+            background: #9d2619;
+            transform: translateY(-2px);
+        }
+        
+        /* ======== LISTA DE PRODUTOS ======== */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .product-card {
+            overflow: hidden;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .product-content {
+            padding: 20px;
+        }
+        
+        .product-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .product-price {
+            color: #b52d1e;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .product-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .categoria-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #f0f0f0;
+            color: #666;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .product-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .status-active {
+            color: #333;
+        }
+        
+        .status-inactive {
+            color: #b51e1ed9;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-edit, .btn-delete {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-edit {
+            color: #333;
+        }
+        
+        .btn-edit:hover {
+            background: #1e8db5d9;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-delete {
+            color: #b51e1ed9;
+        }
+        
+        .btn-delete:hover {
+            background: #b51e1ed9;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* ======== MENSAGENS ======== */
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            position: relative;
+        }
+        
+        .message.loading {
+            background: #b52d1e;
+            color: #f8f3f3;
+            border-radius: 30px;
+        }
+        
+        .message.empty {
+            background: #f8f9fa;
+            color: #666;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        /* ======== RESPONSIVO ======== */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 5px 20px;
+            }
+
+            /* Esconde menu desktop e user info */
+            .menu-desktop {
+                display: none;
+            }
+
+            .user-info {
+                display: none;
+            }
+
+            /* Mostra hambúrguer */
+            .hamburger {
+                display: flex;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-categorias {
+                width: 100%;
+            }
+
+            .categorias-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    // VERIFICAÇÃO SIMPLES
+    console.log("Verificando login...");
+    
+    const adminLogado = localStorage.getItem('adminLogado');
+    const adminEmail = localStorage.getItem('adminEmail');
+    
+    if (!adminLogado || adminLogado !== 'true' || !adminEmail) {
+        console.log('Não logado, redirecionando para login...');
+        window.location.href = 'login.html';
+    } else {
+        console.log('Usuário logado como:', adminEmail);
+        document.addEventListener('DOMContentLoaded', function() {
+            const userEmailEl = document.getElementById('userEmail');
+            const userEmailMobileEl = document.getElementById('userEmailMobile');
+            if (userEmailEl) {
+                userEmailEl.textContent = adminEmail;
+            }
+            if (userEmailMobileEl) {
+                userEmailMobileEl.textContent = adminEmail;
+            }
+        });
+    }
+</script>
+
+    <!-- NAVBAR RESPONSIVA -->
+    <header class="navbar">
+        <div class="logo">
+            <img src="imagens/logo.png" alt="Lofstore" class="logo-img">
+        </div>
+        
+        <!-- MENU DESKTOP -->
+        <nav class="menu-desktop">
+            <ul>
+                <li><a href="index.html" class="principais">Início</a></li>
+                <li><a href="admin.html" class="principais">Painel Admin</a></li>
+                <li><a href="gerenciar-categorias.html" class="principais">Categorias</a></li>
+            </ul>
+        </nav>
+
+        <!-- ÁREA DIREITA (USER INFO + HAMBURGER) -->
+        <div class="navbar-direita">
+            <div class="user-info">
+                <span id="userEmail">admin@lofstore.com</span>
+                <button id="logoutBtn" class="btn-logout">Sair</button>
+            </div>
+
+            <!-- BOTÃO HAMBÚRGUER (Mobile) -->
+            <button class="hamburger" id="hamburger" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MENU MOBILE OVERLAY -->
+    <div class="menu-mobile-overlay" id="menu-mobile-overlay">
+        <div class="menu-mobile-container">
+            <button class="btn-fechar-menu" id="btn-fechar-menu" aria-label="Fechar menu">×</button>
+            
+            <!-- User info no mobile -->
+            <div class="user-info-mobile">
+                <span id="userEmailMobile">admin@lofstore.com</span>
+                <button id="logoutBtnMobile" class="btn-logout-mobile">Sair</button>
+            </div>
+            
+            <nav class="menu-mobile-nav">
+                <ul>
+                    <li><a href="index.html" class="link-mobile">Início</a></li>
+                    <li><a href="admin.html" class="link-mobile">Painel Admin</a></li>
+                    <li><a href="gerenciar-categorias.html" class="link-mobile">Categorias</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div class="container">
+        <!-- FORMULÁRIO DE ADIÇÃO -->
+        <div class="card">
+            <h2>Adicionar Novo Perfume</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <input type="text" id="productName" placeholder="Nome do Perfume (Ex: Essence Noir)">
+                </div>
+                
+                <div class="form-group">
+                    <input type="number" id="productPrice" placeholder="Preço (R$) (Ex: 199.90)" step="0.01" min="0">
+                </div>
+                
+                <!-- CHECKBOXES DE CATEGORIAS -->
+                <div class="categorias-container">
+                    <label class="label-titulo">Categorias (selecione uma ou mais)</label>
+                    <div class="categorias-grid" id="categoriasCheckboxes">
+                        <p style="color: #999; grid-column: 1/-1; text-align: center;">Carregando categorias...</p>
+                    </div>
+                    <div class="categorias-info" id="categoriasInfo">
+                        <strong id="categoriasCount">0</strong> categoria(s) selecionada(s)
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <select id="productStatus">
+                        <option value="true">Status: Ativo</option>
+                        <option value="false">Status: Inativo</option>
+                    </select>
+                </div>
+                
+                <div class="form-group full-width">
+                    <textarea id="productDescription" placeholder="Descrição (Descreva o perfume...)"></textarea>
+                </div>
+                
+                <!-- ÁREA DE UPLOAD -->
+                <div class="upload-area" id="uploadArea">
+                    <p><strong>Clique para adicionar imagem</strong></p>
+                    <p>Arraste ou clique para selecionar (máx: 5MB)</p>
+                    <p>Formatos: JPG, PNG, GIF</p>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <!-- PREVIEW DA IMAGEM -->
+                <div class="image-preview-container">
+                    <img id="imagePreview" class="image-preview" alt="Preview da imagem">
+                    <button id="removeImageBtn" class="btn-remove-image">Remover Imagem</button>
+                </div>
+            </div>
+
+            <div class="admin-shortcuts">
+                <a href="gerenciar-categorias.html" class="btn-categorias">
+                    Gerenciar Categorias
+                </a>
+            </div>
+            
+            <button id="saveProductBtn" class="btn-save">Salvar Perfume</button>
+            <div id="saveMessage" style="text-align: center; margin-top: 10px; min-height: 20px;"></div>
+        </div>
+
+        <!-- LISTA DE PRODUTOS -->
+        <div class="card">
+            <h2>Perfumes Cadastrados</h2>
+            <div id="loadingMessage" class="message loading">Carregando perfumes...</div>
+            <div id="productsContainer" class="products-grid"></div>
+        </div>
+    </div>
+
+    
+<script type="module" src="js/admin.js"></script>
+<script>
+    // ======== FUNÇÃO DE LOGOUT ========
+    function fazerLogout() {
+        if (confirm('Deseja sair do painel admin?')) {
+            localStorage.removeItem('adminLogado');
+            localStorage.removeItem('adminEmail');
+            window.location.href = 'login.html';
+        }
+    }
+
+    // Logout desktop
+    document.getElementById('logoutBtn')?.addEventListener('click', fazerLogout);
+    
+    // Logout mobile
+    document.getElementById('logoutBtnMobile')?.addEventListener('click', fazerLogout);
+
+    // ======== MENU MOBILE ========
+    const hamburger = document.getElementById('hamburger');
+    const menuOverlay = document.getElementById('menu-mobile-overlay');
+    const btnFechar = document.getElementById('btn-fechar-menu');
+
+    // Abre menu
+    hamburger?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuOverlay?.classList.add('ativo');
+        hamburger?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    });
+
+    // Fecha menu (botão X)
+    btnFechar?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fecharMenuMobile();
+    });
+
+    // Fecha ao clicar no overlay
+    menuOverlay?.addEventListener('click', (e) => {
+        if (e.target === menuOverlay) {
+            fecharMenuMobile();
+        }
+    });
+
+    // Fecha menu ao clicar nos links
+    document.querySelectorAll('.menu-mobile-nav a').forEach(link => {
+        link.addEventListener('click', () => {
+            fecharMenuMobile();
+        });
+    });
+
+    // Fecha ao pressionar ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && menuOverlay?.classList.contains('ativo')) {
+            fecharMenuMobile();
+        }
+    });
+
+    function fecharMenuMobile() {
+        menuOverlay?.classList.remove('ativo');
+        hamburger?.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // ======== EFEITO SCROLL NA NAVBAR ========
+    const navbar = document.querySelector(".navbar");
+
+    window.addEventListener("scroll", () => {
+        if (window.scrollY > 80) {
+            navbar.classList.add("scrolled");
+        } else {
+            navbar.classList.remove("scrolled");
+        }
+    });
+</script>
+</body>
+</html>

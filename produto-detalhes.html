@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes do Produto - Lofstore</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="js/navbar.js"></script>
+  
+  <style>
+    /* [Todos os estilos permanecem iguais - mantenho apenas para referência] */
+    .produto-detalhes-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .produto-detalhes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 60px;
+    }
+
+    .produto-imagem-principal {
+      position: sticky;
+      top: 120px;
+      height: fit-content;
+    }
+
+    .produto-imagem-principal img {
+      width: 500px;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .produto-info {
+      padding: 20px 0;
+    }
+
+    .breadcrumb {
+      color: #999;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .breadcrumb a {
+      color: #b52d1e;
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .produto-categoria-badge {
+      display: inline-block;
+      background: #b52d1e;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .produto-nome {
+      font-size: 2.5rem;
+      color: #3b3b3b;
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .produto-preco {
+      font-size: 3rem;
+      color: #b52d1e;
+      font-weight: 700;
+      margin: 30px 0;
+    }
+
+    .produto-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 30px;
+    }
+
+    .produto-status.disponivel {
+      color: #155724;
+    }
+
+    .produto-status.indisponivel {
+      color: #b52d1e;
+    }
+
+    .produto-status::before {
+      content: "●";
+      font-size: 20px;
+    }
+
+    .botoes-compra {
+      display: flex;
+      gap: 15px;
+      margin: 40px 0;
+    }
+
+    .btn-compra {
+      flex: 1;
+      padding: 15px 20px;
+      border: none;
+      border-radius: 30px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-adicionar-carrinho {
+      background: white;
+      color: #b52d1e;
+      border: 2px solid #b52d1e;
+    }
+
+    .btn-adicionar-carrinho:hover {
+      background: #b52d1e;
+      color: white;
+    }
+
+    .btn-comprar-agora {
+      background: #b52d1e;
+      color: white;
+    }
+
+
+    .btn-compra:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .divisor {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+      margin: 40px 0;
+    }
+
+    .produto-descricao {
+      grid-column: 1 / -1;
+      padding: 40px;
+      background: #f9f9f9;
+      border-radius: 20px;
+      margin-top: 40px;
+    }
+
+    .produto-descricao h3 {
+      color: #3b3b3b;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .produto-descricao p {
+      color: #666;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    .btn-voltar {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #b52d1e;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 30px;
+      transition: all 0.3s;
+    }
+
+    .btn-voltar:hover {
+      gap: 15px;
+      color: #9a2519;
+    }
+
+    .loading-container {
+      text-align: center;
+      padding: 100px 20px;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #b52d1e;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .erro-container {
+      text-align: center;
+      padding: 100px 20px;
+      color: #666;
+    }
+
+    .erro-container h2 {
+      color: #b52d1e;
+      margin-bottom: 15px;
+    }
+
+    .notificacao {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      background: #155724;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+      display: none;
+    }
+
+    .notificacao.mostrar {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .produto-detalhes {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+
+      .produto-imagem-principal {
+        position: relative;
+        top: 0;
+        display: flex;
+        justify-content: center;
+      }
+
+      .produto-imagem-principal img{
+        width: 250px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .produto-nome {
+        font-size: 2rem;
+      }
+
+      .produto-preco {
+        font-size: 2.5rem;
+      }
+
+      .botoes-compra {
+        flex-direction: column;
+        height: 20px;
+        width: 310px;
+        font-size: 12px;
+      }
+
+      .produto-descricao {
+        padding: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Notificação -->
+  <div class="notificacao" id="notificacao">
+    ✓ Produto adicionado ao carrinho!
+  </div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="produto-detalhes-container">
+    <div id="produto-conteudo">
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Carregando produto...</p>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { db } from './js/firebase.js';
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { adicionarAoCarrinho, inicializarCarrinho } from './js/carrinho.js';
+
+    console.log("PÁGINA PRODUTO-DETALHES CARREGANDO...");
+
+    // FUNÇÃO PARA PEGAR ID DA URL - CORRIGIDA
+    function getProductIdFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      console.log("URL completa:", window.location.href);
+      console.log("Query string:", window.location.search);
+      console.log("ID extraído:", id);
+      return id;
+    }
+
+    function formatarPreco(preco) {
+      if (!preco && preco !== 0) return 'R$ 0,00';
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(preco);
+    }
+
+    async function carregarProduto() {
+      const produtoId = getProductIdFromURL();
+      const container = document.getElementById('produto-conteudo');
+      
+      console.log("Tentando carregar produto com ID:", produtoId);
+      
+      if (!produtoId) {
+        console.log("Nenhum ID encontrado na URL");
+        container.innerHTML = `
+          <div class="erro-container">
+            <h2>Produto não encontrado</h2>
+            <p>O produto que você procura não existe ou foi removido.</p>
+            <p><small>Nenhum ID foi fornecido na URL</small></p>
+            <a href="index.html" class="btn-voltar">← Voltar para a loja</a>
+          </div>
+        `;
+        return;
+      }
+      
+      try {
+        console.log("Buscando produto no Firestore:", produtoId);
+        const docRef = doc(db, "perfumes", produtoId);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          console.log("Produto encontrado:", docSnap.data().nome);
+          const produto = docSnap.data();
+          exibirProduto(produto, produtoId);
+        } else {
+          console.log("Produto não encontrado no Firestore");
+          container.innerHTML = `
+            <div class="erro-container">
+              <h2>Produto não encontrado</h2>
+              <p>O produto que você procura não existe ou foi removido.</p>
+              <p><small>ID: ${produtoId}</small></p>
+              <a href="index.html" class="btn-voltar">← Voltar para a loja</a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error("Erro ao carregar produto:", error);
+        container.innerHTML = `
+          <div class="erro-container">
+            <h2>Erro ao carregar produto</h2>
+            <p>${error.message}</p>
+            <p><small>Verifique sua conexão com a internet</small></p>
+            <a href="index.html" class="btn-voltar">← Voltar para a loja</a>
+          </div>
+        `;
+      }
+    }
+
+    function exibirProduto(produto, produtoId) {
+      const container = document.getElementById('produto-conteudo');
+      const temImagem = produto.imagem && (produto.imagem.startsWith('data:image') || produto.imagem.startsWith('http'));
+      const srcImagem = temImagem ? produto.imagem : 'imagens/produto-placeholder.jpg';
+
+      container.innerHTML = `
+        <a href="index.html" class="btn-voltar">← Voltar para a loja</a>
+
+        <div class="produto-detalhes">
+          <div class="produto-imagem-principal">
+            <img src="${srcImagem}" 
+                 alt="${produto.nome}" 
+                 onerror="this.onerror=null; this.src='imagens/produto-placeholder.jpg'">
+          </div>
+
+          <div class="produto-info">
+            <div class="breadcrumb">
+              <a href="index.html">Home</a> / 
+              <a href="index.html#produtos">Produtos</a> / 
+              ${produto.categoria || 'Sem categoria'}
+            </div>
+
+            ${produto.categoria ? `
+              <span class="produto-categoria-badge">${produto.categoria}</span>
+            ` : ''}
+
+            <h1 class="produto-nome">${produto.nome || 'Sem nome'}</h1>
+
+            <div class="produto-preco">${formatarPreco(produto.preco)}</div>
+
+            <span class="produto-status ${produto.ativo ? 'disponivel' : 'indisponivel'}">
+              ${produto.ativo ? 'Disponível em estoque' : 'Indisponível'}
+            </span>
+
+            <div class="divisor"></div>
+
+            ${produto.ativo ? `
+              <div class="botoes-compra">
+                <button class="btn-compra btn-adicionar-carrinho" onclick="window.adicionarProdutoAoCarrinho('${produtoId}')">
+                  Adicionar ao Carrinho
+                </button>
+                <button class="btn-compra btn-comprar-agora" onclick="window.comprarAgoraProduto('${produtoId}')">
+                  Comprar Agora
+                </button>
+              </div>
+            ` : `
+              <div class="botoes-compra">
+                <button class="btn-compra btn-adicionar-carrinho" disabled>
+                  Produto Indisponível
+                </button>
+              </div>
+            `}
+          </div>
+        </div>
+
+        ${produto.descricao ? `
+          <div class="produto-descricao">
+            <h3>Descrição do Produto</h3>
+            <p>${produto.descricao}</p>
+          </div>
+        ` : ''}
+      `;
+
+      document.title = `${produto.nome} - Lofstore`;
+    }
+
+    // Funções de compra
+    window.adicionarProdutoAoCarrinho = async function(produtoId) {
+      const resultado = await adicionarAoCarrinho(produtoId);
+      
+      if (resultado.sucesso) {
+        mostrarNotificacao(resultado.mensagem);
+      } else {
+        alert(resultado.mensagem);
+      }
+    };
+
+    window.comprarAgoraProduto = async function(produtoId) {
+      const resultado = await adicionarAoCarrinho(produtoId);
+      
+      if (resultado.sucesso) {
+        window.location.href = 'carrinho.html';
+      } else {
+        alert(resultado.mensagem);
+      }
+    };
+
+    function mostrarNotificacao(mensagem) {
+      const notif = document.getElementById('notificacao');
+      notif.textContent = mensagem;
+      notif.classList.add('mostrar');
+      
+      setTimeout(() => {
+        notif.classList.remove('mostrar');
+      }, 3000);
+    }
+
+    // INICIALIZAÇÃO - EXECUTA ASSIM QUE O SCRIPT CARREGAR
+    console.log("Iniciando carregamento do produto...");
+    carregarProduto();
+    inicializarCarrinho();
+
+    // Funções do navbar
+    const navbar = document.querySelector(".navbar");
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 80) {
+        navbar.classList.add("scrolled");
+      } else {
+        navbar.classList.remove("scrolled");
+      }
+    });
+
+    window.buscarProdutos = function() {
+      const searchInput = document.getElementById('searchInput');
+      const termo = searchInput.value.trim();
+      
+      if (!termo) return;
+      
+      window.location.href = `index.html?busca=${encodeURIComponent(termo)}`;
+    };
+
+    document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        buscarProdutos();
+      }
+    });
+
+    window.filtrarPorCategoria = function(categoria) {
+      window.location.href = `index.html?categoria=${encodeURIComponent(categoria)}`;
+    };
+
+    // Verifica admin
+    function verificarAdmin() {
+      const adminLogado = localStorage.getItem('adminLogado');
+      const btnPainelAdmin = document.getElementById('btn-painel-admin');
+      
+      if (adminLogado === 'true') {
+        btnPainelAdmin.classList.add('mostrar');
+      } else {
+        btnPainelAdmin.classList.remove('mostrar');
+      }
+    }
+
+    verificarAdmin();
+  </script>
+
+  <script src="js/slider.js"></script>
+
+</body>
+</html>

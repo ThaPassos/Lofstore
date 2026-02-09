@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - LofStore</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="js/navbar.js"></script>
+    
+    <style>
+        /* Tela de carregamento */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #b52d1e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .perfil-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: none;
+        }
+
+        .perfil-container.mostrar {
+            display: block;
+        }
+
+        .perfil-header {
+            background: linear-gradient(135deg, #b52d1e 0%, #d63a2b 100%);
+            color: white;
+            padding: 40px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .perfil-info h1 {
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .perfil-info p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .btn-sair {
+            background: white;
+            color: #b52d1e;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-sair:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .perfil-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+        }
+
+        .card h2 {
+            color: #b52d1e;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .dados-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .dados-item:last-child {
+            border-bottom: none;
+        }
+
+        .dados-label {
+            font-weight: 600;
+            color: #666;
+            min-width: 40%;
+        }
+
+        .dados-valor {
+            color: #333;
+            text-align: right;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            max-width: 60%;
+        }
+
+        .btn-editar-perfil {
+            background: #b52d1e;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-editar-perfil:hover {
+            background: #9d2619;
+            transform: translateY(-2px);
+        }
+
+        .pedidos-lista {
+            display: grid;
+            gap: 20px;
+        }
+
+        .pedido-card {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #b52d1e;
+            transition: all 0.3s ease;
+        }
+
+        .pedido-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .pedido-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pedido-numero {
+            font-weight: 700;
+            color: #b52d1e;
+            font-size: 1.1rem;
+        }
+
+        .pedido-status {
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pago {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .pedido-detalhes {
+            display: grid;
+            gap: 12px;
+            color: #666;
+        }
+
+        .pedido-detalhes p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+
+        .pedido-detalhes strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .pedido-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px; 
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            margin: 5px 0;
+        }
+
+        .pedido-item:hover {
+            background: #f0f0f0;
+        }
+
+        /* BOTÃO FINALIZAR PAGAMENTO */
+        .btn-finalizar-pagamento {
+            display: inline-block;
+            background: #b52d1e;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-finalizar-pagamento:hover {
+            background: #721c24;
+        }
+
+        .nenhum-pedido {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .nenhum-pedido h3 {
+            color: #b52d1e;
+            margin-bottom: 15px;
+        }
+
+        .btn-comprar {
+            display: inline-block;
+            background: #b52d1e;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 15px;
+            cursor: pointer;
+            margin-right: 30px;
+        }
+
+        /* Modal de edição */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-editar {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-editar h2 {
+            color: #b52d1e;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: "Raleway", sans-serif;
+        }
+
+        .botoes-modal {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn-cancelar {
+            flex: 1;
+            background: #666;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-salvar {
+            flex: 1;
+            background: #b52d1e;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .perfil-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .perfil-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+                padding: 30px 20px;
+            }
+    
+            .card {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .perfil-grid > .card {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .dados-item {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .dados-label, 
+            .dados-valor {
+                width: 100%;
+                text-align: left;
+            }
+            
+            .dados-valor {
+                max-width: 100%;
+            }
+
+            .pedido-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .btn-finalizar-pagamento {
+                width: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- TELA DE CARREGAMENTO -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="perfil-container" id="perfil-container">
+        <div class="perfil-header">
+            <div class="perfil-info">
+                <h1 id="nome-usuario">Carregando...</h1>
+                <p id="email-usuario"></p>
+            </div>
+            <button class="btn-sair" id="btn-sair">Sair</button>
+        </div>
+
+        <div class="perfil-grid">
+            <!-- DADOS PESSOAIS -->
+            <div class="card">
+                <h2>Meus Dados</h2>
+                <div id="dados-pessoais">
+                    <div class="dados-item">
+                        <span class="dados-label">Nome:</span>
+                        <span class="dados-valor" id="dados-nome">-</span>
+                    </div>
+                    <div class="dados-item">
+                        <span class="dados-label">E-mail:</span>
+                        <span class="dados-valor" id="dados-email">-</span>
+                    </div>
+                    <div class="dados-item">
+                        <span class="dados-label">Telefone:</span>
+                        <span class="dados-valor" id="dados-telefone">-</span>
+                    </div>
+                    <div class="dados-item">
+                        <span class="dados-label">Endereço:</span>
+                        <span class="dados-valor" id="dados-endereco">-</span>
+                    </div>
+                </div>
+                <button class="btn-editar-perfil" id="btn-editar">Editar Dados</button>
+            </div>
+
+            <!-- HISTÓRICO DE PEDIDOS -->
+            <div class="card">
+                <h2>Meus Pedidos</h2>
+                <div id="pedidos-lista" class="pedidos-lista">
+                    <div style="text-align: center; padding: 40px; color: #999;">
+                        <p>Carregando pedidos...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DE EDIÇÃO -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-editar">
+            <h2>Editar Dados Pessoais</h2>
+            <div id="message" class="message" style="display: none;"></div>
+            
+            <form id="form-editar">
+                <div class="form-group">
+                    <label for="edit-nome">Nome Completo</label>
+                    <input type="text" id="edit-nome" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-telefone">Telefone</label>
+                    <input type="tel" id="edit-telefone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-endereco">Endereço Completo</label>
+                    <input type="text" id="edit-endereco" required>
+                </div>
+
+                <div class="botoes-modal">
+                    <button type="button" class="btn-cancelar" id="btn-cancelar">Cancelar</button>
+                    <button type="submit" class="btn-salvar">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { doc, getDoc, updateDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    console.log("Perfil.html carregando...");
+
+    let usuarioAtual = null;
+    const loadingScreen = document.getElementById('loading-screen');
+    const perfilContainer = document.getElementById('perfil-container');
+
+    // PROTEÇÃO DE ROTA - Verifica autenticação
+    let authChecked = false;
+    
+    onAuthStateChanged(auth, async (user) => {
+        console.log("Auth state changed:", user ? user.email : "Não logado");
+        
+        if (authChecked) {
+            console.log("Auth já verificado, ignorando...");
+            return;
+        }
+        authChecked = true;
+
+        if (!user) {
+            console.log("Usuário não logado, redirecionando...");
+            const urlAtual = window.location.href;
+            const redirect = encodeURIComponent(urlAtual);
+            
+            setTimeout(() => {
+                window.location.href = `login-usuario.html?redirect=${redirect}`;
+            }, 500);
+            return;
+        }
+
+        console.log("Usuário logado:", user.email);
+        usuarioAtual = user;
+        
+        try {
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            if (perfilContainer) perfilContainer.classList.add('mostrar');
+            
+            await carregarDadosUsuario(user.uid);
+            await carregarPedidos(user.uid);
+
+            console.log("Perfil carregado com sucesso!");
+        } catch (error) {
+            console.error("Erro ao carregar perfil:", error);
+            if (loadingScreen) {
+                loadingScreen.innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <h2 style="color: #f44336;">Erro ao carregar perfil</h2>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #b52d1e; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                            Tentar novamente
+                        </button>
+                    </div>
+                `;
+            }
+        }
+    });
+
+    // Carrega dados do usuário
+    async function carregarDadosUsuario(uid) {
+        console.log("Carregando dados do usuário:", uid);
+        
+        try {
+            const userDoc = await getDoc(doc(db, "usuarios", uid));
+            
+            if (userDoc.exists()) {
+                const dados = userDoc.data();
+                console.log("Dados encontrados:", dados);
+                
+                document.getElementById('nome-usuario').textContent = dados.nome || 'Usuário';
+                document.getElementById('email-usuario').textContent = dados.email || '';
+                
+                document.getElementById('dados-nome').textContent = dados.nome || '-';
+                document.getElementById('dados-email').textContent = dados.email || '-';
+                document.getElementById('dados-telefone').textContent = dados.telefone || '-';
+                document.getElementById('dados-endereco').textContent = dados.endereco || '-';
+            } else {
+                console.warn("Documento do usuário não encontrado");
+                document.getElementById('nome-usuario').textContent = usuarioAtual.displayName || 'Usuário';
+                document.getElementById('email-usuario').textContent = usuarioAtual.email || '';
+            }
+        } catch (error) {
+            console.error('Erro ao carregar dados:', error);
+            throw error;
+        }
+    }
+
+    // Carrega pedidos do usuário
+    async function carregarPedidos(uid) {
+        console.log("Carregando pedidos do usuário:", uid);
+        const container = document.getElementById('pedidos-lista');
+        
+        try {
+            const q = query(
+                collection(db, "pedidos"),
+                where("usuarioId", "==", uid),
+                orderBy("criadoEm", "desc")
+            );
+            
+            const querySnapshot = await getDocs(q);
+            console.log(`Encontrados ${querySnapshot.size} pedidos`);
+            
+            if (querySnapshot.empty) {
+                container.innerHTML = `
+                    <div class="nenhum-pedido">
+                        <h3>Nenhum pedido realizado ainda</h3>
+                        <p>Comece a comprar nossos perfumes!</p>
+                        <a href="index.html#produtos" class="btn-comprar">Ver Produtos</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            querySnapshot.forEach((doc) => {
+                const pedido = doc.data();
+                container.innerHTML += criarCardPedido(doc.id, pedido);
+            });
+
+        } catch (error) {
+            console.error('Erro ao carregar pedidos:', error);
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #f44336;">
+                    <p>Erro ao carregar pedidos</p>
+                    <p><small>${error.message}</small></p>
+                </div>
+            `;
+        }
+    }
+
+    // Cria card de pedido COM STATUS E BOTÃO DE PAGAMENTO
+    function criarCardPedido(id, pedido) {
+        const data = new Date(pedido.criadoEm).toLocaleDateString('pt-BR');
+        const hora = new Date(pedido.criadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        
+        // Define status e cor
+        let statusTexto = 'Aguardando Pagamento';
+        let statusClasse = 'status-pendente';
+        
+        if (pedido.statusPagamento === 'pago') {
+            statusTexto = '✓ Pago';
+            statusClasse = 'status-pago';
+        } else if (pedido.statusPagamento === 'cancelado') {
+            statusTexto = '✗ Cancelado';
+            statusClasse = 'status-cancelado';
+        } else if (pedido.statusPagamento === 'pendente' || pedido.statusPagamento === 'aguardando') {
+            statusTexto = 'Aguardando Pagamento';
+            statusClasse = 'status-pendente';
+        }
+        
+        // Botão de pagamento (só aparece se ainda não foi pago)
+        let botaoPagamento = '';
+        if ((pedido.statusPagamento === 'pendente' || pedido.statusPagamento === 'aguardando') && pedido.linkPagamento) {
+            botaoPagamento = `
+                <a href="${pedido.linkPagamento}" 
+                   class="btn-finalizar-pagamento" 
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    Finalizar Pagamento
+                </a>
+            `;
+        }
+        
+        let itensHTML = '';
+        if (pedido.itens && pedido.itens.length > 0) {
+            itensHTML = pedido.itens.map(item => `
+                <div class="pedido-item">
+                    <span>${item.nome} ${item.quantidade ? `(x${item.quantidade})` : ''}</span>
+                    <span style="color: #b52d1e; font-weight: 600;">R$ ${parseFloat(item.preco * (item.quantidade || 1)).toFixed(2)}</span>
+                </div>
+            `).join('');
+        }
+
+        return `
+            <div class="pedido-card">
+                <div class="pedido-header">
+                    <span class="pedido-numero">Pedido #${id.substring(0, 8)}</span>
+                    <span class="pedido-status ${statusClasse}">${statusTexto}</span>
+                </div>
+                <div class="pedido-detalhes">
+                    <p><strong>Data:</strong> ${data} às ${hora}</p>
+                    <p><strong>Total:</strong> R$ ${parseFloat(pedido.total || 0).toFixed(2)}</p>
+                    ${itensHTML}
+                    ${botaoPagamento}
+                </div>
+            </div>
+        `;
+    }
+
+    // Botão sair
+    document.getElementById('btn-sair')?.addEventListener('click', async () => {
+        if (confirm('Deseja sair da sua conta?')) {
+            try {
+                await signOut(auth);
+                localStorage.removeItem('userLogado');
+                localStorage.removeItem('userEmail');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Erro ao sair:', error);
+                alert('Erro ao sair. Tente novamente.');
+            }
+        }
+    });
+
+    // Editar perfil
+    document.getElementById('btn-editar')?.addEventListener('click', async () => {
+        if (!usuarioAtual) return;
+        
+        const userDoc = await getDoc(doc(db, "usuarios", usuarioAtual.uid));
+        const dados = userDoc.exists() ? userDoc.data() : {};
+
+        document.getElementById('edit-nome').value = dados.nome || '';
+        document.getElementById('edit-telefone').value = dados.telefone || '';
+        document.getElementById('edit-endereco').value = dados.endereco || '';
+
+        document.getElementById('modal-overlay').style.display = 'flex';
+    });
+
+    // Cancelar edição
+    document.getElementById('btn-cancelar')?.addEventListener('click', () => {
+        document.getElementById('modal-overlay').style.display = 'none';
+    });
+
+    // Salvar edição
+    document.getElementById('form-editar')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!usuarioAtual) return;
+
+        const nome = document.getElementById('edit-nome').value.trim();
+        const telefone = document.getElementById('edit-telefone').value.trim();
+        const endereco = document.getElementById('edit-endereco').value.trim();
+
+        const messageEl = document.getElementById('message');
+
+        try {
+            await updateDoc(doc(db, "usuarios", usuarioAtual.uid), {
+                nome: nome,
+                telefone: telefone,
+                endereco: endereco,
+                atualizadoEm: new Date().toISOString()
+            });
+
+            await updateProfile(usuarioAtual, {
+                displayName: nome
+            });
+
+            messageEl.textContent = 'Dados atualizados com sucesso!';
+            messageEl.className = 'message success';
+            messageEl.style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('modal-overlay').style.display = 'none';
+                carregarDadosUsuario(usuarioAtual.uid);
+            }, 1500);
+
+        } catch (error) {
+            console.error('Erro ao atualizar:', error);
+            messageEl.textContent = 'Erro ao atualizar dados';
+            messageEl.className = 'message error';
+            messageEl.style.display = 'block';
+        }
+    });
+
+    // Verifica admin e inicializa carrinho
+    import { inicializarCarrinho } from './js/carrinho.js';
+
+    function verificarAdmin() {
+        const adminLogado = localStorage.getItem('adminLogado');
+        const btnPainelAdmin = document.getElementById('btn-painel-admin');
+        
+        if (adminLogado === 'true') {
+            btnPainelAdmin?.classList.add('mostrar');
+        } else {
+            btnPainelAdmin?.classList.remove('mostrar');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        inicializarCarrinho();
+        verificarAdmin();
+    });
+
+    window.buscarProdutos = function() {
+        const searchInput = document.getElementById('searchInput');
+        const termo = searchInput.value.trim();
+        
+        if (!termo) return;
+        
+        if (!window.location.pathname.includes('index.html')) {
+            window.location.href = `index.html?busca=${encodeURIComponent(termo)}`;
+        }
+    };
+
+    document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            buscarProdutos();
+        }
+    });
+
+    window.filtrarPorCategoria = function(categoria) {
+        if (!window.location.pathname.includes('index.html')) {
+            window.location.href = `index.html?categoria=${encodeURIComponent(categoria)}`;
+        }
+    };
+
+</script>
+</body>
+</html>

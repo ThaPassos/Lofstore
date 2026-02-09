@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento Aprovado - LofStore</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .sucesso-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .icone-sucesso {
+            font-size: 80px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+
+        .numero-pedido {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 600;
+            color: #b52d1e;
+        }
+
+        .btn-continuar {
+            display: inline-block;
+            background: #b52d1e;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-continuar:hover {
+            background: #9d2619;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="sucesso-container">
+        <div class="icone-sucesso">✓</div>
+        <h1>Pagamento Aprovado!</h1>
+        <p>Seu pedido foi confirmado com sucesso.</p>
+        
+        <div class="numero-pedido" id="numero-pedido">
+            Carregando...
+        </div>
+
+        <p>Você receberá um e-mail com todos os detalhes.</p>
+
+        <a href="index.html" class="btn-continuar">Voltar para a Loja</a>
+        <a href="perfil.html" class="btn-continuar" style="background: #666;">Ver Meus Pedidos</a>
+    </div>
+
+    <script>
+        // Pega ID do pedido da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const pedidoId = urlParams.get('pedido');
+        
+        if (pedidoId) {
+            document.getElementById('numero-pedido').textContent = 
+                `Pedido: #${pedidoId.substring(0, 8)}`;
+        }
+    </script>
+</body>
+</html>

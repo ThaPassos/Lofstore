@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin - LofStore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Raleway", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 600;
+            font-style: normal;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #b52d1e 0%, #d63a2b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: #f8f3f3;
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            border-radius: 20px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #b52d1e;
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #b52d1e;
+        }
+        
+        .form-group input {
+            border: none;
+            outline: none;
+            background: none;
+            padding: 12px 0;
+            font-size: 16px;
+            width: 100%;
+            color: #333;
+        }
+        
+        .form-group input::placeholder {
+            color: #999;
+        }
+        
+        .entrar {
+            width: 100%;
+            background-color: #b52d1e;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            border-radius: 30px;
+            height: 50px;
+        }
+        
+        .entrar:hover {
+            background-color: #9d2619;
+        }
+        
+        .entrar:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #b52d1e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>LofStore Admin</h1>
+            <p>Painel de Administração</p>
+        </div>
+        
+        <div id="message" class="message"></div>
+        
+        <div class="form-group">
+            <input type="email" id="email" class="email" placeholder="Coloque seu e-mail de administrador">
+        </div>
+        
+        <div class="form-group">
+            <input type="password" id="password" class="senha" placeholder="Sua senha">
+        </div>
+        
+        <button id="entrar" class="entrar">
+            <span id="entrarTexto">Entrar no Painel</span>
+        </button>
+        
+        <div class="footer">
+            <p>Acesso restrito a administradores autorizados</p>
+            <p><a href="index.html">Voltar para a loja</a></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth } from './js/firebase.js';
+        import { 
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword 
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { isEmailAdmin } from './js/admins-autorizados.js'; // ← NOVO: Importa verificação de admin
+
+        // Elementos
+        const messageEl = document.getElementById('message');
+        const entrarBtn = document.getElementById('entrar');
+        const entrarTexto = document.getElementById('entrarTexto');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+
+        // Função para mostrar mensagens
+        function showMessage(text, type = 'info') {
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            
+            // Limpa mensagem após 5 segundos (exceto loading)
+            if (type !== 'info') {
+                setTimeout(() => {
+                    messageEl.textContent = '';
+                    messageEl.className = 'message';
+                }, 5000);
+            }
+        }
+
+        // Função para mostrar loading
+        function showLoading(isLoading) {
+            if (isLoading) {
+                entrarTexto.innerHTML = `<div class="loading"></div> Processando...`;
+                entrarBtn.disabled = true;
+            } else {
+                entrarBtn.disabled = false;
+                entrarTexto.textContent = 'Entrar no Painel';
+            }
+        }
+
+        // Função principal de autenticação
+        async function handleAuthentication() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!email || !password) {
+                showMessage('Por favor, preencha todos os campos', 'error');
+                return;
+            }
+            
+            // VERIFICAÇÃO CRÍTICA: Checa se o email está autorizado
+            if (!isEmailAdmin(email)) {
+                showMessage('Acesso negado! Este e-mail não tem permissão de administrador.', 'error');
+                showLoading(false);
+                console.warn(`Tentativa de login não autorizada: ${email}`);
+                
+                // Log de segurança
+                console.log(`SEGURANÇA: Acesso bloqueado para ${email} em ${new Date().toISOString()}`);
+                return;
+            }
+            
+            showLoading(true);
+            showMessage('Verificando credenciais...', 'info');
+            
+            try {
+                // Primeiro tenta fazer login
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                showMessage(`Login realizado com sucesso!`, 'success');
+                
+                // Salva no localStorage
+                localStorage.setItem('adminLogado', 'true');
+                localStorage.setItem('adminEmail', email);
+                
+                // Redireciona após 1.5 segundos
+                setTimeout(() => {
+                    window.location.href = 'admin.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Erro login:', error.code);
+                
+                // Se o erro for "usuário não encontrado", tenta criar a conta
+                if (error.code === 'auth/user-not-found') {
+                    showMessage('Conta não encontrada. Criando conta de administrador...', 'info');
+                    
+                    try {
+                        // Tenta criar a conta
+                        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                        const user = userCredential.user;
+                        
+                        showMessage(`Conta criada com sucesso!`, 'success');
+                        
+                        // Salva no localStorage
+                        localStorage.setItem('adminLogado', 'true');
+                        localStorage.setItem('adminEmail', email);
+                        
+                        // Redireciona
+                        setTimeout(() => {
+                            window.location.href = 'admin.html';
+                        }, 1500);
+                        
+                    } catch (createError) {
+                        console.error('Erro criar conta:', createError);
+                        
+                        if (createError.code === 'auth/email-already-in-use') {
+                            showMessage('Este e-mail já está em uso. Tente fazer login.', 'error');
+                        } else if (createError.code === 'auth/invalid-email') {
+                            showMessage('E-mail inválido. Verifique o formato.', 'error');
+                        } else if (createError.code === 'auth/weak-password') {
+                            showMessage('Senha muito fraca. Use pelo menos 6 caracteres.', 'error');
+                        } else {
+                            showMessage(`Erro ao criar conta: ${createError.message}`, 'error');
+                        }
+                        showLoading(false);
+                    }
+                    
+                } else if (error.code === 'auth/wrong-password') {
+                    showMessage('Senha incorreta. Tente novamente.', 'error');
+                    showLoading(false);
+                } else if (error.code === 'auth/too-many-requests') {
+                    showMessage('Muitas tentativas. Tente novamente mais tarde.', 'error');
+                    showLoading(false);
+                } else {
+                    showMessage(`Erro: ${error.message}`, 'error');
+                    showLoading(false);
+                }
+            }
+        }
+
+        // Evento de clique no botão entrar
+        entrarBtn.addEventListener('click', handleAuthentication);
+
+        // Enter para login
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleAuthentication();
+            }
+        });
+
+        // Enter no email também
+        emailInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                passwordInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>

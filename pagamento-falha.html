@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento Não Aprovado - LofStore</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .erro-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .icone-erro {
+            font-size: 80px;
+            color: #f44336;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #721c24;
+            margin-bottom: 15px;
+        }
+
+        .btn-tentar {
+            display: inline-block;
+            background: #b52d1e;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="erro-container">
+        <div class="icone-erro">✗</div>
+        <h1>Pagamento Não Aprovado</h1>
+        <p>Houve um problema com seu pagamento.</p>
+        <p>Por favor, tente novamente ou escolha outro método de pagamento.</p>
+
+        <a href="carrinho.html" class="btn-tentar">Tentar Novamente</a>
+        <a href="index.html" class="btn-tentar" style="background: #666;">Voltar para a Loja</a>
+    </div>
+</body>
+</html>

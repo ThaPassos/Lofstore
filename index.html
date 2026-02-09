@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lofstore - Perfumes</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="js/navbar.js"></script>
+</head>
+<body>
+
+  <!-- SLIDER -->
+ <!-- SLIDER -->
+<section class="slider">
+  <div class="slides-container">
+    <div class="slides">
+      <div class="slide fade">
+        <img src="imagens/slide1.png" alt="Perfume 1" class="img-desktop">
+        <img src="imagens/slide1M.png" alt="Perfume 1 mobile" class="img-mobile">
+      </div>
+
+      <div class="slide fade">
+        <img src="imagens/slider3.png" alt="Perfume 2" class="img-desktop">
+        <img src="imagens/slider3M.png" alt="Perfume 2 mobile" class="img-mobile">
+      </div>
+
+      <div class="slide fade">
+        <img src="imagens/slider2.png" alt="Perfume 3" class="img-desktop">
+        <img src="imagens/slider2M.png" alt="Perfume 3 mobile" class="img-mobile">
+      </div>
+    </div>
+  </div>
+
+  <a class="prev" onclick="plusSlides(-1)"><img src="imagens/setaEsquerda.png" alt="" class="setas"></a> 
+  <a class="next" onclick="plusSlides(1)"><img src="imagens/setaDireita.png" alt="" class="setas"></a>
+
+  <div class="dots">
+    <span class="dot" onclick="currentSlide(1)"></span>
+    <span class="dot" onclick="currentSlide(2)"></span>
+    <span class="dot" onclick="currentSlide(3)"></span>
+  </div>
+</section>
+
+  <section>
+    <div class="categorias" id="categorias-circulares">
+    
+    </div>
+  </section>
+
+  <!-- PRODUTOS -->
+  <section class="produtos-section" id="produtos">
+    <h2 class="titulo-produtos" id="titulo-secao">NOSSOS PERFUMES</h2>
+    
+    <div class="container-produtos">
+      <div id="lista-produtos" class="lista-produtos">
+        <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+          <p style="font-size: 18px; color: #666;">Carregando perfumes...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTATO -->
+  <section>
+    <div class="contato">
+      <div class="endereços">
+        <p>Telefone: <br> (11) 98524-2367</p>
+        <p>Telefone: <br> (11) 91327-6996</p>
+        <p>Email: <br> fbrunosp10@gmail.com</p>
+        <div class="logosContato">
+          <a href="https://www.instagram.com/lofstore_outlet/"><img src="imagens/instagram.png" alt=""></a>
+          <a href="https://wa.me/5511985242367?text=Olá, vim pelo site e gostaria de mais algumas informações"><img src="imagens/Whatsapp.png" alt=""></a>
+        </div>
+        
+      </div>
+    </div>
+  </section>
+
+
+  <script type="module" src="js/slider.js"></script>
+  
+  <script type="module">
+  import { auth } from './js/firebase.js';
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { inicializarCarrinho } from './js/carrinho.js';
+  import { inicializarCategorias, carregarCategorias } from './js/categorias.js';
+
+  console.log("Iniciando scripts da index...");
+
+  function verificarAdmin() {
+    const adminLogado = localStorage.getItem('adminLogado');
+    const btnPainelAdmin = document.getElementById('btn-painel-admin');
+    const liPainelAdminMobile = document.getElementById('li-painel-admin-mobile');
+    
+    if (adminLogado === 'true') {
+      if (btnPainelAdmin) btnPainelAdmin.classList.add('mostrar');
+      if (liPainelAdminMobile) liPainelAdminMobile.style.display = 'block';
+      console.log('Admin detectado - botões exibidos');
+    } else {
+      if (btnPainelAdmin) btnPainelAdmin.classList.remove('mostrar');
+      if (liPainelAdminMobile) liPainelAdminMobile.style.display = 'none';
+      console.log('Não é admin - botões ocultos');
+    }
+  }
+
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      console.log('Usuário logado:', user.email);
+    } else {
+      console.log('Nenhum usuário logado');
+    }
+    verificarAdmin();
+  });
+
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log("DOM carregado - inicializando...");
+    
+    inicializarCarrinho();
+    
+    verificarAdmin();
+    
+    inicializarMenuMobile();
+    
+    try {
+      await inicializarCategorias();
+      console.log('Categorias inicializadas com sucesso');
+    } catch (error) {
+      console.error('Erro ao inicializar categorias:', error);
+    }
+  });
+
+
+  window.atualizarMenusCategorias = function(categorias) {
+    console.log('Atualizando menus com categorias:', categorias);
+    
+    const menuCategoriasDesktop = document.getElementById('menu-categorias-desktop');
+    const menuCategoriasMobile = document.getElementById('submenu-categorias-mobile');
+    
+    if (!menuCategoriasDesktop || !menuCategoriasMobile) {
+      console.warn('Elementos do menu não encontrados');
+      return;
+    }
+    
+    const todasDesktop = menuCategoriasDesktop.querySelector('li:first-child')?.outerHTML || '<li><a href="#" onclick="filtrarPorCategoria(\'\'); return false;">Todas as Categorias</a></li>';
+    const todasMobile = menuCategoriasMobile.querySelector('li:first-child')?.outerHTML || '<li><a href="#" onclick="filtrarPorCategoria(\'\'); fecharMenuMobile(); return false;">Todas as Categorias</a></li>';
+    
+    menuCategoriasDesktop.innerHTML = todasDesktop;
+    menuCategoriasMobile.innerHTML = todasMobile;
+
+    categorias.forEach(categoria => {
+
+      const liDesktop = document.createElement('li');
+      const aDesktop = document.createElement('a');
+      aDesktop.href = '#';
+      aDesktop.textContent = categoria;
+      aDesktop.onclick = (e) => {
+        e.preventDefault();
+        if (typeof window.filtrarPorCategoria === 'function') {
+          window.filtrarPorCategoria(categoria);
+        }
+      };
+      liDesktop.appendChild(aDesktop);
+      menuCategoriasDesktop.appendChild(liDesktop);
+
+      // Mobile
+      const liMobile = document.createElement('li');
+      const aMobile = document.createElement('a');
+      aMobile.href = '#';
+      aMobile.textContent = categoria;
+      aMobile.onclick = (e) => {
+        e.preventDefault();
+        if (typeof window.filtrarPorCategoria === 'function') {
+          window.filtrarPorCategoria(categoria);
+        }
+        if (typeof window.fecharMenuMobile === 'function') {
+          window.fecharMenuMobile();
+        }
+      };
+      liMobile.appendChild(aMobile);
+      menuCategoriasMobile.appendChild(liMobile);
+    });
+    
+    console.log(`${categorias.length} categorias adicionadas aos menus`);
+  };
+
+    // =================== MENU MOBILE SIMPLIFICADO ===================
+    function inicializarMenuMobile() {
+      const hamburger = document.getElementById('hamburger');
+      const menuOverlay = document.getElementById('menu-mobile-overlay');
+      const btnFechar = document.getElementById('btn-fechar-menu');
+      const categoriasToggleMobile = document.getElementById('categorias-toggle-mobile');
+      const submenuMobile = document.getElementById('submenu-categorias-mobile');
+
+      console.log('Inicializando menu mobile separado...');
+
+      // Abre o menu mobile
+      hamburger?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        abrirMenuMobile();
+      });
+
+      // Fecha o menu mobile (botão X)
+      btnFechar?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fecharMenuMobile();
+      });
+
+      // Fecha ao clicar no overlay (fundo escuro)
+      menuOverlay?.addEventListener('click', (e) => {
+        if (e.target === menuOverlay) {
+          fecharMenuMobile();
+        }
+      });
+
+      // Toggle do submenu de categorias no mobile
+      categoriasToggleMobile?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropdownMobile = categoriasToggleMobile.closest('.dropdown-mobile');
+        dropdownMobile?.classList.toggle('ativo');
+      });
+
+      // Fecha menu ao clicar em links (exceto o toggle de categorias)
+      document.querySelectorAll('.menu-mobile-nav a:not(.dropdown-toggle-mobile)').forEach(link => {
+        link.addEventListener('click', () => {
+          fecharMenuMobile();
+        });
+      });
+
+      // Fecha ao pressionar ESC
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && menuOverlay?.classList.contains('ativo')) {
+          fecharMenuMobile();
+        }
+      });
+    }
+
+    // Função global para fechar menu (usada nos links de categorias)
+    window.fecharMenuMobile = function() {
+      const menuOverlay = document.getElementById('menu-mobile-overlay');
+      const hamburger = document.getElementById('hamburger');
+      
+      menuOverlay?.classList.remove('ativo');
+      hamburger?.classList.remove('active');
+      document.body.style.overflow = '';
+      
+      console.log('Menu mobile fechado');
+    }
+
+    function abrirMenuMobile() {
+      const menuOverlay = document.getElementById('menu-mobile-overlay');
+      const hamburger = document.getElementById('hamburger');
+      
+      menuOverlay?.classList.add('ativo');
+      hamburger?.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      console.log('Menu mobile aberto');
+    }
+
+    // =================== SCROLL NAVBAR ===================
+    const navbar = document.querySelector(".navbar");
+    
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 80) {
+        navbar.classList.add("scrolled");
+      } else {
+        navbar.classList.remove("scrolled");
+      }
+    });
+
+    // =================== BUSCA ===================
+    window.buscarProdutos = function() {
+      const searchInput = document.getElementById('searchInput');
+      const termo = searchInput.value.trim();
+      
+      console.log("🔍 Buscando:", termo);
+      
+      if (!termo) return;
+      
+      if (typeof window.filtrarProdutosPorBusca === 'function') {
+        window.filtrarProdutosPorBusca(termo);
+      }
+    };
+
+    // Enter para buscar
+    document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        buscarProdutos();
+      }
+    });
+    
+    console.log("Scripts da index carregados!");
+  </script>
+
+  <!-- CARREGA PRODUTOS POR ÚLTIMO -->
+  <script type="module" src="js/produtos.js"></script>
+
+  <!-- CSS de favoritos -->
+<link rel="stylesheet" href="favoritos.css">
+
+<!-- Scripts de favoritos -->
+<script type="module">
+  import { inicializarFavoritos } from './js/favoritos.js';
+  import './js/favoritos-cards.js';
+  
+  // Inicializa favoritos
+  document.addEventListener('DOMContentLoaded', () => {
+    inicializarFavoritos();
+  });
+</script>
+
+</body>
+</html>
