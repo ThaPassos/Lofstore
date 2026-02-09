@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin - LofStore</title>
+    <title>Login - LofStore</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: "Raleway", sans-serif;
-            font-optical-sizing: auto;
-            font-weight: 600;
-            font-style: normal;
         }
         
         body {
@@ -85,7 +84,7 @@
             color: #999;
         }
         
-        .entrar {
+        .btn-entrar {
             width: 100%;
             background-color: #b52d1e;
             color: white;
@@ -100,11 +99,11 @@
             height: 50px;
         }
         
-        .entrar:hover {
+        .btn-entrar:hover {
             background-color: #9d2619;
         }
         
-        .entrar:disabled {
+        .btn-entrar:disabled {
             background-color: #ccc;
             cursor: not-allowed;
             transform: none;
@@ -116,31 +115,45 @@
             margin-bottom: 20px;
             text-align: center;
             font-size: 14px;
+            display: none;
         }
         
         .message.success {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
+            display: block;
         }
         
         .message.error {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+            display: block;
         }
         
         .message.info {
             background: #d1ecf1;
             color: #0c5460;
             border: 1px solid #bee5eb;
+            display: block;
         }
         
         .footer {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 20px;
             color: #666;
             font-size: 14px;
+        }
+        
+        .footer a {
+            color: #b52d1e;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
         }
         
         .loading {
@@ -158,180 +171,251 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .opcoes-login {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .opcoes-login a {
+            color: #b52d1e;
+            text-decoration: none;
+        }
+
+        .opcoes-login a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="logo">
-            <h1>LofStore Admin</h1>
-            <p>Painel de Administração</p>
+            <h1>Bem-vindo de volta</h1>
+            <p>Entre na sua conta LofStore</p>
         </div>
         
         <div id="message" class="message"></div>
         
-        <div class="form-group">
-            <input type="email" id="email" class="email" placeholder="Coloque seu e-mail de administrador">
-        </div>
-        
-        <div class="form-group">
-            <input type="password" id="password" class="senha" placeholder="Sua senha">
-        </div>
-        
-        <button id="entrar" class="entrar">
-            <span id="entrarTexto">Entrar no Painel</span>
-        </button>
+        <form id="form-login">
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" required placeholder="seu@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" required placeholder="Digite sua senha">
+            </div>
+
+            <div class="opcoes-login">
+                <label>
+                    <input type="checkbox" id="lembrar"> Lembrar-me
+                </label>
+                <a href="#" id="esqueci-senha">Esqueci minha senha</a>
+            </div>
+            
+            <button type="submit" id="btn-entrar" class="btn-entrar">
+                <span id="btn-texto">Entrar</span>
+            </button>
+        </form>
         
         <div class="footer">
-            <p>Acesso restrito a administradores autorizados</p>
+            <p>Não tem uma conta? <a href="cadastro.html">Cadastre-se</a></p>
             <p><a href="index.html">Voltar para a loja</a></p>
         </div>
     </div>
 
     <script type="module">
-        import { auth } from './js/firebase.js';
+        import { auth, db } from './js/firebase.js';
         import { 
             signInWithEmailAndPassword,
-            createUserWithEmailAndPassword 
+            createUserWithEmailAndPassword,
+            sendPasswordResetEmail
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { isEmailAdmin } from './js/admins-autorizados.js'; // ← NOVO: Importa verificação de admin
+        import {
+            doc,
+            getDoc
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { isEmailAdmin } from './js/admins-autorizados.js';
 
-        // Elementos
+        const form = document.getElementById('form-login');
         const messageEl = document.getElementById('message');
-        const entrarBtn = document.getElementById('entrar');
-        const entrarTexto = document.getElementById('entrarTexto');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
+        const btnEntrar = document.getElementById('btn-entrar');
+        const btnTexto = document.getElementById('btn-texto');
+        const esqueciSenha = document.getElementById('esqueci-senha');
 
-        // Função para mostrar mensagens
         function showMessage(text, type = 'info') {
             messageEl.textContent = text;
             messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
             
-            // Limpa mensagem após 5 segundos (exceto loading)
             if (type !== 'info') {
                 setTimeout(() => {
-                    messageEl.textContent = '';
-                    messageEl.className = 'message';
+                    messageEl.style.display = 'none';
                 }, 5000);
             }
         }
 
-        // Função para mostrar loading
         function showLoading(isLoading) {
             if (isLoading) {
-                entrarTexto.innerHTML = `<div class="loading"></div> Processando...`;
-                entrarBtn.disabled = true;
+                btnTexto.innerHTML = `<div class="loading"></div> Entrando...`;
+                btnEntrar.disabled = true;
             } else {
-                entrarBtn.disabled = false;
-                entrarTexto.textContent = 'Entrar no Painel';
+                btnEntrar.disabled = false;
+                btnTexto.textContent = 'Entrar';
             }
         }
 
-        // Função principal de autenticação
-        async function handleAuthentication() {
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
+        // Recuperar senha
+        esqueciSenha.addEventListener('click', async function(e) {
+            e.preventDefault();
             
-            if (!email || !password) {
-                showMessage('Por favor, preencha todos os campos', 'error');
+            const email = document.getElementById('email').value.trim();
+            
+            if (!email) {
+                showMessage('Digite seu e-mail primeiro', 'error');
                 return;
             }
-            
-            // VERIFICAÇÃO CRÍTICA: Checa se o email está autorizado
-            if (!isEmailAdmin(email)) {
-                showMessage('Acesso negado! Este e-mail não tem permissão de administrador.', 'error');
-                showLoading(false);
-                console.warn(`Tentativa de login não autorizada: ${email}`);
-                
-                // Log de segurança
-                console.log(`SEGURANÇA: Acesso bloqueado para ${email} em ${new Date().toISOString()}`);
+
+            if (!confirm(`Enviar e-mail de recuperação para ${email}?`)) {
                 return;
             }
-            
-            showLoading(true);
-            showMessage('Verificando credenciais...', 'info');
-            
+
             try {
-                // Primeiro tenta fazer login
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                
-                showMessage(`Login realizado com sucesso!`, 'success');
-                
-                // Salva no localStorage
-                localStorage.setItem('adminLogado', 'true');
-                localStorage.setItem('adminEmail', email);
-                
-                // Redireciona após 1.5 segundos
-                setTimeout(() => {
-                    window.location.href = 'admin.html';
-                }, 1500);
-                
+                await sendPasswordResetEmail(auth, email);
+                showMessage('E-mail de recuperação enviado! Verifique sua caixa de entrada.', 'success');
             } catch (error) {
-                console.error('Erro login:', error.code);
-                
-                // Se o erro for "usuário não encontrado", tenta criar a conta
+                console.error('Erro ao enviar e-mail:', error);
                 if (error.code === 'auth/user-not-found') {
-                    showMessage('Conta não encontrada. Criando conta de administrador...', 'info');
+                    showMessage('E-mail não cadastrado', 'error');
+                } else {
+                    showMessage('Erro ao enviar e-mail: ' + error.message, 'error');
+                }
+            }
+        });
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const senha = document.getElementById('senha').value;
+            const lembrar = document.getElementById('lembrar').checked;
+
+            if (!email || !senha) {
+                showMessage('Preencha todos os campos', 'error');
+                return;
+            }
+
+            showLoading(true);
+            
+            // Verifica se é admin
+            const eAdmin = isEmailAdmin(email);
+            
+            if (eAdmin) {
+                showMessage('Verificando credenciais de administrador...', 'info');
+            } else {
+                showMessage('Verificando credenciais...', 'info');
+            }
+
+            try {
+                // Tenta fazer login
+                const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+                const user = userCredential.user;
+
+                if (eAdmin) {
+                    // É ADMIN - redireciona para painel admin
+                    showMessage('Login de administrador realizado com sucesso!', 'success');
+                    
+                    localStorage.setItem('adminLogado', 'true');
+                    localStorage.setItem('adminEmail', email);
+                    
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1500);
+                    
+                } else {
+                    // É USUÁRIO COMUM - verifica documento e redireciona
+                    const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+                    
+                    if (userDoc.exists() && userDoc.data().tipo === 'cliente') {
+                        showMessage('Login realizado com sucesso!', 'success');
+
+                        if (lembrar) {
+                            localStorage.setItem('userLogado', 'true');
+                            localStorage.setItem('userEmail', email);
+                        }
+
+                        const params = new URLSearchParams(window.location.search);
+                        const redirect = params.get('redirect');
+                        
+                        setTimeout(() => {
+                            if (redirect) {
+                                window.location.href = decodeURIComponent(redirect);
+                            } else {
+                                window.location.href = 'perfil.html';
+                            }
+                        }, 1500);
+                    } else {
+                        showMessage('Erro ao carregar dados do usuário', 'error');
+                        await auth.signOut();
+                        showLoading(false);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Erro ao fazer login:', error);
+                
+                // Se admin não encontrado, tenta criar conta
+                if (error.code === 'auth/user-not-found' && eAdmin) {
+                    showMessage('Criando conta de administrador...', 'info');
                     
                     try {
-                        // Tenta criar a conta
-                        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                        const user = userCredential.user;
+                        const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+                        showMessage('Conta de administrador criada com sucesso!', 'success');
                         
-                        showMessage(`Conta criada com sucesso!`, 'success');
-                        
-                        // Salva no localStorage
                         localStorage.setItem('adminLogado', 'true');
                         localStorage.setItem('adminEmail', email);
                         
-                        // Redireciona
                         setTimeout(() => {
                             window.location.href = 'admin.html';
                         }, 1500);
                         
                     } catch (createError) {
-                        console.error('Erro criar conta:', createError);
+                        console.error('Erro ao criar conta admin:', createError);
+                        showLoading(false);
                         
-                        if (createError.code === 'auth/email-already-in-use') {
-                            showMessage('Este e-mail já está em uso. Tente fazer login.', 'error');
-                        } else if (createError.code === 'auth/invalid-email') {
-                            showMessage('E-mail inválido. Verifique o formato.', 'error');
-                        } else if (createError.code === 'auth/weak-password') {
+                        if (createError.code === 'auth/weak-password') {
                             showMessage('Senha muito fraca. Use pelo menos 6 caracteres.', 'error');
                         } else {
-                            showMessage(`Erro ao criar conta: ${createError.message}`, 'error');
+                            showMessage('Erro ao criar conta: ' + createError.message, 'error');
                         }
-                        showLoading(false);
                     }
-                    
-                } else if (error.code === 'auth/wrong-password') {
-                    showMessage('Senha incorreta. Tente novamente.', 'error');
-                    showLoading(false);
-                } else if (error.code === 'auth/too-many-requests') {
-                    showMessage('Muitas tentativas. Tente novamente mais tarde.', 'error');
-                    showLoading(false);
                 } else {
-                    showMessage(`Erro: ${error.message}`, 'error');
+                    // Erros comuns de login
                     showLoading(false);
+                    
+                    if (error.code === 'auth/user-not-found') {
+                        showMessage('Usuário não encontrado', 'error');
+                    } else if (error.code === 'auth/wrong-password') {
+                        showMessage('Senha incorreta', 'error');
+                    } else if (error.code === 'auth/invalid-email') {
+                        showMessage('E-mail inválido', 'error');
+                    } else if (error.code === 'auth/too-many-requests') {
+                        showMessage('Muitas tentativas. Tente novamente mais tarde.', 'error');
+                    } else {
+                        showMessage('Erro ao fazer login: ' + error.message, 'error');
+                    }
                 }
-            }
-        }
-
-        // Evento de clique no botão entrar
-        entrarBtn.addEventListener('click', handleAuthentication);
-
-        // Enter para login
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleAuthentication();
             }
         });
 
-        // Enter no email também
-        emailInput.addEventListener('keypress', (e) => {
+        // Enter para submeter
+        document.getElementById('senha').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                passwordInput.focus();
+                form.dispatchEvent(new Event('submit'));
             }
         });
     </script>
