@@ -26,7 +26,7 @@ export function configurarUploadSimples() {
       return;
     }
     
-    if (arquivo.size > 5 * 1024 * 1024) { 
+    if (arquivo.size > 15 * 1024 * 1024) { 
       mostrarStatus('Imagem muito grande (máx: 5MB)', 'erro');
       return;
     }
