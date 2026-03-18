@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Categorias - LofStore Admin</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Raleway", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 200;
+            font-style: normal;
+        }
+        
+        body {
+            background: #f8f3f3;
+            color: #333;
+        }
+        
+        /* NAVBAR COMPLETA IGUAL À INDEX */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 50px;
+            background-color: #f8f3f3;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: background-color 0.4s ease, padding 0.4s ease;
+        }
+
+        .logo img {
+            height: 90px;
+        }
+
+        /* MENU PRINCIPAL */
+        .menu ul {
+            list-style: none;
+            display: flex;
+            gap: 40px;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: #b52d1e;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .principais {
+            color: #b52d1e;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding-bottom: 5px;
+            font-size: 15px;
+        }
+
+        .menu a:hover {
+            color: #b85c5c;
+        }
+
+        /* USER INFO E LOGOUT */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info span {
+            color: #b52d1e;
+            font-weight: 600;
+        }
+        
+        .btn-logout {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        /* NAVBAR AO SCROLL */
+        .navbar.scrolled {
+            background-color: #b52d1e;
+        }
+
+        .navbar.scrolled .logo img {
+            content: url("imagens/logo2a.png");
+            height: 85px;
+        }
+
+        .navbar.scrolled .principais,
+        .navbar.scrolled .user-info span {
+            color: #f8f3f3;
+        }
+
+        .navbar.scrolled .btn-logout {
+            background: #f8f3f3;
+            color: #b52d1e;
+        }
+
+        .navbar.scrolled .btn-logout:hover {
+            background: #e0e0e0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: transparent;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #b52d1e;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            color: #666;
+        }
+        
+        .card {
+            background: transparent;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        /* FORMULÁRIO COM ESTILO PADRONIZADO */
+        .form-adicionar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            flex: 1;
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .form-group:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #b52d1e;
+        }
+        
+        .form-group input {
+            border: none;
+            outline: none;
+            background: none;
+            padding: 12px 0;
+            font-size: 16px;
+            width: 100%;
+            color: #333;
+        }
+        
+        .form-group input::placeholder {
+            color: #b52d1ebb;
+            opacity: 1;
+        }
+        
+        .btn-adicionar {
+            background: transparent;
+            color: #8db51ed9;
+            border: none;
+            padding: 2px 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 30px;
+        }
+        
+        .btn-adicionar:hover {
+            background: #8db51e61;
+            color: #f8f3f3;
+        }
+        
+        .lista-categorias {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .categoria-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            transition: all 0.3s;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .categoria-nome {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .btn-remover {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-remover:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+        
+        .mensagem {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .mensagem.sucesso {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .mensagem.erro {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .mensagem.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 5px 20px;
+            }
+
+            .form-adicionar {
+                flex-direction: column;
+            }
+            
+            .categoria-item {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR COMPLETA -->
+    <header class="navbar">
+        <div class="logo">
+            <img src="imagens/logo.png" alt="Lofstore" class="logo-img">
+        </div>
+        
+        <nav class="menu">
+            <ul>
+                <li><a href="index.html" class="principais">Início</a></li>
+                <li><a href="admin.html" class="principais">Painel Admin</a></li>
+                <li><a href="gerenciar-categorias.html" class="principais">Categorias</a></li>
+            </ul>
+        </nav>
+
+        <div class="user-info">
+            <span id="userEmail">admin@lofstore.com</span>
+            <button id="logoutBtn" class="btn-logout">Sair</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="header">
+            <h1>Gerenciar Categorias</h1>
+            <p>Adicione ou remova categorias de produtos</p>
+        </div>
+        
+        <div class="card">
+            <h2>Adicionar Nova Categoria</h2>
+            
+            <div id="mensagem-adicionar"></div>
+            
+            <div class="form-adicionar">
+                <div class="form-group">
+                    <input type="text" 
+                           id="input-nova-categoria" 
+                           placeholder="Ex: Perfumes Importados" 
+                           maxlength="50">
+                </div>
+                <button id="btn-adicionar" class="btn-adicionar">Adicionar</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Categorias Cadastradas</h2>
+            
+            <div id="mensagem-lista"></div>
+            
+            <div id="lista-categorias" class="lista-categorias">
+                <div class="loading">Carregando categorias...</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth } from './js/firebase.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { 
+            carregarCategorias, 
+            adicionarCategoria, 
+            removerCategoria 
+        } from './js/categorias.js';
+
+        // Elementos
+        const inputNovaCategoria = document.getElementById('input-nova-categoria');
+        const btnAdicionar = document.getElementById('btn-adicionar');
+        const listaContainer = document.getElementById('lista-categorias');
+        const mensagemAdicionar = document.getElementById('mensagem-adicionar');
+        const mensagemLista = document.getElementById('mensagem-lista');
+
+        // Verifica autenticação
+        onAuthStateChanged(auth, (user) => {
+            const userEmailEl = document.getElementById('userEmail');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (!user) {
+                alert('Você precisa estar logado para acessar esta página!');
+                window.location.href = 'login.html';
+            } else {
+                console.log('Admin logado:', user.email);
+                
+                // Atualiza email na navbar
+                if (userEmailEl) {
+                    userEmailEl.textContent = user.email;
+                }
+                
+                // Configura logout
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => {
+                        if (confirm('Deseja sair do painel admin?')) {
+                            localStorage.removeItem('adminLogado');
+                            localStorage.removeItem('adminEmail');
+                            window.location.href = 'login.html';
+                        }
+                    });
+                }
+                
+                carregarEExibirCategorias();
+            }
+        });
+
+        // Carrega e exibe categorias
+        async function carregarEExibirCategorias() {
+            try {
+                listaContainer.innerHTML = '<div class="loading">Carregando...</div>';
+                
+                const categorias = await carregarCategorias();
+                
+                exibirCategorias(categorias);
+                
+            } catch (error) {
+                console.error('Erro ao carregar:', error);
+                listaContainer.innerHTML = `
+                    <div class="empty">
+                        Erro ao carregar categorias: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Exibe lista de categorias
+        function exibirCategorias(categorias) {
+            if (categorias.length === 0) {
+                listaContainer.innerHTML = `
+                    <div class="empty">
+                        Nenhuma categoria cadastrada ainda
+                    </div>
+                `;
+                return;
+            }
+
+            listaContainer.innerHTML = '';
+
+            categorias.forEach(categoria => {
+                const item = document.createElement('div');
+                item.className = 'categoria-item';
+                item.innerHTML = `
+                    <span class="categoria-nome">${categoria}</span>
+                    <button class="btn-remover" data-categoria="${categoria}">
+                        Remover
+                    </button>
+                `;
+                listaContainer.appendChild(item);
+            });
+
+            // Adiciona eventos de remoção
+            document.querySelectorAll('.btn-remover').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const categoria = this.dataset.categoria;
+                    await removerCategoriaHandler(categoria);
+                });
+            });
+        }
+
+        // Adiciona nova categoria
+        async function adicionarCategoriaHandler() {
+            const novaCategoria = inputNovaCategoria.value.trim();
+
+            if (!novaCategoria) {
+                mostrarMensagem(mensagemAdicionar, 'Digite o nome da categoria', 'erro');
+                return;
+            }
+
+            btnAdicionar.disabled = true;
+            btnAdicionar.textContent = 'Adicionando...';
+
+            try {
+                await adicionarCategoria(novaCategoria);
+                
+                mostrarMensagem(mensagemAdicionar, `Categoria "${novaCategoria}" adicionada!`, 'sucesso');
+                
+                inputNovaCategoria.value = '';
+                
+                await carregarEExibirCategorias();
+                
+            } catch (error) {
+                mostrarMensagem(mensagemAdicionar, `Erro: ${error.message}`, 'erro');
+            } finally {
+                btnAdicionar.disabled = false;
+                btnAdicionar.textContent = 'Adicionar';
+            }
+        }
+
+        // Remove categoria
+        async function removerCategoriaHandler(categoria) {
+            if (!confirm(`Tem certeza que deseja remover a categoria "${categoria}"?\n\nOs produtos desta categoria não serão excluídos, mas ficarão sem categoria.`)) {
+                return;
+            }
+
+            try {
+                mostrarMensagem(mensagemLista, 'Removendo...', 'info');
+                
+                await removerCategoria(categoria);
+                
+                mostrarMensagem(mensagemLista, `Categoria "${categoria}" removida!`, 'sucesso');
+                
+                await carregarEExibirCategorias();
+                
+            } catch (error) {
+                mostrarMensagem(mensagemLista, `Erro: ${error.message}`, 'erro');
+            }
+        }
+
+        // Mostra mensagem temporária
+        function mostrarMensagem(elemento, texto, tipo) {
+            elemento.innerHTML = `<div class="mensagem ${tipo}">${texto}</div>`;
+            
+            setTimeout(() => {
+                elemento.innerHTML = '';
+            }, 5000);
+        }
+
+        // Eventos
+        btnAdicionar.addEventListener('click', adicionarCategoriaHandler);
+
+        inputNovaCategoria.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                adicionarCategoriaHandler();
+            }
+        });
+
+        // Efeito scroll na navbar
+        const navbar = document.querySelector(".navbar");
+
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 80) {
+                navbar.classList.add("scrolled");
+            } else {
+                navbar.classList.remove("scrolled");
+            }
+        });
+    </script>
+</body>
+</html>

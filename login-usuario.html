@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - LofStore</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Raleway", sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #b52d1e 0%, #d63a2b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: #f8f3f3;
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            border-radius: 20px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #b52d1e;
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #999;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab.ativa {
+            color: #b52d1e;
+            border-bottom-color: #b52d1e;
+        }
+
+        .tab:hover {
+            color: #b52d1e;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #b52d1e;
+        }
+        
+        .form-group input {
+            border: none;
+            outline: none;
+            background: none;
+            padding: 12px 0;
+            font-size: 16px;
+            width: 100%;
+            color: #333;
+        }
+        
+        .form-group input::placeholder {
+            color: #999;
+        }
+        
+        .btn-entrar {
+            width: 100%;
+            background-color: #b52d1e;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            border-radius: 30px;
+            height: 50px;
+        }
+        
+        .btn-entrar:hover {
+            background-color: #9d2619;
+        }
+        
+        .btn-entrar:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .footer a {
+            color: #b52d1e;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #b52d1e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .opcoes-login {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .opcoes-login a {
+            color: #b52d1e;
+            text-decoration: none;
+        }
+
+        .opcoes-login a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>Bem-vindo à LofStore</h1>
+            <p id="subtitulo">Faça login para continuar</p>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <div class="tab ativa" data-tab="login">Login</div>
+            <div class="tab" data-tab="cadastro">Cadastrar</div>
+        </div>
+        
+        <div id="message" class="message"></div>
+        
+        <!-- FORMULÁRIO DE LOGIN -->
+        <form id="form-login" style="display: block;">
+            <div class="form-group">
+                <label for="email-login">E-mail</label>
+                <input type="email" id="email-login" required placeholder="seu@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="senha-login">Senha</label>
+                <input type="password" id="senha-login" required placeholder="Digite sua senha">
+            </div>
+
+            <div class="opcoes-login">
+                <label>
+                    <input type="checkbox" id="lembrar"> Lembrar-me
+                </label>
+                <a href="#" id="esqueci-senha">Esqueci minha senha</a>
+            </div>
+            
+            <button type="submit" id="btn-entrar" class="btn-entrar">
+                <span id="btn-texto-login">Entrar</span>
+            </button>
+        </form>
+
+        <!-- FORMULÁRIO DE CADASTRO -->
+        <form id="form-cadastro" style="display: none;">
+            <div class="form-group">
+                <label for="nome-cadastro">Nome Completo *</label>
+                <input type="text" id="nome-cadastro" required minlength="2" placeholder="João Silva">
+            </div>
+
+            <div class="form-group">
+                <label for="telefone-cadastro">Telefone *</label>
+                <input type="tel" id="telefone-cadastro" required placeholder="(00) 00000-0000">
+            </div>
+
+            <div class="form-group">
+                <label for="endereco-cadastro">Endereço Completo *</label>
+                <input type="text" id="endereco-cadastro" required minlength="10" placeholder="Rua, número, bairro, cidade">
+            </div>
+
+            <div class="form-group">
+                <label for="email-cadastro">E-mail *</label>
+                <input type="email" id="email-cadastro" required placeholder="seu@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="senha-cadastro">Senha *</label>
+                <input type="password" id="senha-cadastro" required minlength="6" placeholder="Mínimo 6 caracteres">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmar-senha">Confirmar Senha *</label>
+                <input type="password" id="confirmar-senha" required placeholder="Digite a senha novamente">
+            </div>
+            
+            <button type="submit" id="btn-cadastrar" class="btn-entrar">
+                <span id="btn-texto-cadastro">Criar Conta</span>
+            </button>
+        </form>
+        
+        <div class="footer">
+            <p><a href="index.html">Voltar para a loja</a></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebase.js';
+        import { 
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            updateProfile,
+            sendPasswordResetEmail
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import {
+            doc,
+            getDoc,
+            setDoc
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { isEmailAdmin } from './js/admins-autorizados.js';
+
+        // =================== ELEMENTOS ===================
+        const formLogin = document.getElementById('form-login');
+        const formCadastro = document.getElementById('form-cadastro');
+        const messageEl = document.getElementById('message');
+        const subtitulo = document.getElementById('subtitulo');
+
+        // =================== TABS ===================
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tipo = this.dataset.tab;
+                
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativa'));
+                this.classList.add('ativa');
+                
+                if (tipo === 'login') {
+                    formLogin.style.display = 'block';
+                    formCadastro.style.display = 'none';
+                    subtitulo.textContent = 'Faça login para continuar';
+                } else {
+                    formLogin.style.display = 'none';
+                    formCadastro.style.display = 'block';
+                    subtitulo.textContent = 'Crie sua conta na LofStore';
+                }
+                
+                messageEl.style.display = 'none';
+            });
+        });
+
+        // =================== FUNÇÕES AUXILIARES ===================
+        function showMessage(text, type = 'info') {
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+            
+            if (type !== 'info') {
+                setTimeout(() => {
+                    messageEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function showLoading(isLoading, formType = 'login') {
+            const btn = formType === 'login' ? document.getElementById('btn-entrar') : document.getElementById('btn-cadastrar');
+            const btnTexto = formType === 'login' ? document.getElementById('btn-texto-login') : document.getElementById('btn-texto-cadastro');
+            
+            if (isLoading) {
+                btnTexto.innerHTML = `<div class="loading"></div> ${formType === 'login' ? 'Entrando' : 'Criando conta'}...`;
+                btn.disabled = true;
+            } else {
+                btn.disabled = false;
+                btnTexto.textContent = formType === 'login' ? 'Entrar' : 'Criar Conta';
+            }
+        }
+
+        // =================== MÁSCARA DE TELEFONE ===================
+        const telefoneCadastro = document.getElementById('telefone-cadastro');
+        telefoneCadastro?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+            }
+            e.target.value = value;
+        });
+
+        // =================== ESQUECI SENHA ===================
+        document.getElementById('esqueci-senha')?.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email-login').value.trim();
+            
+            if (!email) {
+                showMessage('Digite seu e-mail primeiro', 'error');
+                return;
+            }
+
+            if (!confirm(`Enviar e-mail de recuperação para ${email}?`)) {
+                return;
+            }
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showMessage('E-mail de recuperação enviado! Verifique sua caixa de entrada.', 'success');
+            } catch (error) {
+                console.error('Erro ao enviar e-mail:', error);
+                if (error.code === 'auth/user-not-found') {
+                    showMessage('E-mail não cadastrado', 'error');
+                } else {
+                    showMessage('Erro ao enviar e-mail: ' + error.message, 'error');
+                }
+            }
+        });
+
+        // =================== LOGIN ===================
+        formLogin.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email-login').value.trim();
+            const senha = document.getElementById('senha-login').value;
+            const lembrar = document.getElementById('lembrar').checked;
+
+            if (!email || !senha) {
+                showMessage('Preencha todos os campos', 'error');
+                return;
+            }
+
+            showLoading(true, 'login');
+            showMessage('Verificando credenciais...', 'info');
+
+            try {
+                // 🔥 VERIFICA SE É ADMIN
+                const eAdmin = isEmailAdmin(email);
+                console.log(`Email ${email} é admin?`, eAdmin);
+
+                // Tenta fazer login
+                const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+                const user = userCredential.user;
+
+                if (eAdmin) {
+                    // ✅ É ADMIN
+                    console.log('✅ Admin autenticado:', email);
+                    
+                    localStorage.setItem('adminLogado', 'true');
+                    localStorage.setItem('adminEmail', email);
+                    localStorage.setItem('userLogado', 'true');
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('userName', user.displayName || email.split('@')[0]);
+
+                    showMessage('Bem-vindo, Administrador! 🎉', 'success');
+
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 1500);
+
+                } else {
+                    // ✅ É CLIENTE
+                    console.log('✅ Cliente autenticado:', email);
+
+                    const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+                    
+                    if (!userDoc.exists()) {
+                        showMessage('Usuário não encontrado. Faça o cadastro.', 'error');
+                        await auth.signOut();
+                        showLoading(false, 'login');
+                        return;
+                    }
+
+                    localStorage.setItem('userLogado', 'true');
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('userName', user.displayName || email.split('@')[0]);
+                    
+                    localStorage.removeItem('adminLogado');
+                    localStorage.removeItem('adminEmail');
+
+                    showMessage('Login realizado com sucesso!', 'success');
+
+                    const params = new URLSearchParams(window.location.search);
+                    const redirect = params.get('redirect');
+                    
+                    setTimeout(() => {
+                        if (redirect) {
+                            window.location.href = decodeURIComponent(redirect);
+                        } else {
+                            window.location.href = 'perfil.html';
+                        }
+                    }, 1500);
+                }
+
+            } catch (error) {
+                console.error('Erro ao fazer login:', error);
+                showLoading(false, 'login');
+
+                // Se for admin e usuário não existe, cria automaticamente
+                if (error.code === 'auth/user-not-found' && isEmailAdmin(email)) {
+                    showMessage('Criando conta de administrador...', 'info');
+                    
+                    try {
+                        const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+                        
+                        localStorage.setItem('adminLogado', 'true');
+                        localStorage.setItem('adminEmail', email);
+                        localStorage.setItem('userLogado', 'true');
+                        localStorage.setItem('userEmail', email);
+                        
+                        showMessage('Conta de admin criada! Redirecionando...', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'admin.html';
+                        }, 1500);
+                        
+                    } catch (createError) {
+                        console.error('Erro ao criar conta de admin:', createError);
+                        showMessage('Erro ao criar conta: ' + createError.message, 'error');
+                    }
+                    
+                } else if (error.code === 'auth/user-not-found') {
+                    showMessage('Usuário não encontrado. Crie uma conta primeiro.', 'error');
+                } else if (error.code === 'auth/wrong-password') {
+                    showMessage('Senha incorreta', 'error');
+                } else if (error.code === 'auth/invalid-email') {
+                    showMessage('E-mail inválido', 'error');
+                } else if (error.code === 'auth/too-many-requests') {
+                    showMessage('Muitas tentativas. Tente novamente mais tarde.', 'error');
+                } else {
+                    showMessage('Erro ao fazer login: ' + error.message, 'error');
+                }
+            }
+        });
+
+        // =================== CADASTRO ===================
+        formCadastro.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const nome = document.getElementById('nome-cadastro').value.trim();
+            const telefone = document.getElementById('telefone-cadastro').value.trim();
+            const endereco = document.getElementById('endereco-cadastro').value.trim();
+            const email = document.getElementById('email-cadastro').value.trim();
+            const senha = document.getElementById('senha-cadastro').value;
+            const confirmarSenha = document.getElementById('confirmar-senha').value;
+
+            if (senha !== confirmarSenha) {
+                showMessage('As senhas não coincidem', 'error');
+                return;
+            }
+
+            if (senha.length < 6) {
+                showMessage('A senha deve ter pelo menos 6 caracteres', 'error');
+                return;
+            }
+
+            showLoading(true, 'cadastro');
+            showMessage('Criando sua conta...', 'info');
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+                const user = userCredential.user;
+
+                await updateProfile(user, {
+                    displayName: nome
+                });
+
+                await setDoc(doc(db, "usuarios", user.uid), {
+                    nome: nome,
+                    email: email,
+                    telefone: telefone,
+                    endereco: endereco,
+                    criadoEm: new Date().toISOString(),
+                    tipo: 'cliente'
+                });
+
+                localStorage.setItem('userLogado', 'true');
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userName', nome);
+
+                showMessage('Conta criada com sucesso! Redirecionando...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'perfil.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Erro ao criar conta:', error);
+                showLoading(false, 'cadastro');
+
+                if (error.code === 'auth/email-already-in-use') {
+                    showMessage('Este e-mail já está em uso', 'error');
+                } else if (error.code === 'auth/invalid-email') {
+                    showMessage('E-mail inválido', 'error');
+                } else if (error.code === 'auth/weak-password') {
+                    showMessage('Senha muito fraca', 'error');
+                } else {
+                    showMessage('Erro ao criar conta: ' + error.message, 'error');
+                }
+            }
+        });
+
+        // Enter para submeter
+        document.getElementById('senha-login')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                formLogin.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        document.getElementById('confirmar-senha')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                formCadastro.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>

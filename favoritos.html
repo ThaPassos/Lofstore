@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Favoritos - LofStore</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="js/navbar.js"></script>
+    <style>
+        .favoritos-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .favoritos-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .favoritos-header h1 {
+            color: #b52d1e;
+            margin-bottom: 10px;
+        }
+
+        .favoritos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .favorito-card {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .favorito-imagem {
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .favorito-info {
+            padding: 20px;
+        }
+
+        .favorito-nome {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .favorito-preco {
+            color: #b52d1e;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .favorito-acoes {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-ver-produto,
+        .btn-remover-favorito {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+
+        .btn-ver-produto {
+            background: #b52d1e;
+            color: white;
+        }
+
+        .btn-ver-produto:hover {
+            background: #9d2619;
+        }
+
+        .btn-remover-favorito {
+            background: transparent;
+            color: #b52d1e;
+            border: 2px solid #b52d1e;
+        }
+
+        .btn-remover-favorito:hover {
+            background: #b52d1e;
+            color: white;
+        }
+
+        .favoritos-vazio {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .favoritos-vazio h2 {
+            color: #b52d1e;
+            margin-bottom: 15px;
+        }
+
+        .favoritos-vazio p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .btn-continuar {
+            display: inline-block;
+            background: #b52d1e;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-continuar:hover {
+            background: #9d2619;
+        }
+
+        .btn-limpar-favoritos {
+            display: block;
+            margin: 0 auto 30px;
+            background: transparent;
+            color: #b52d1e;
+            border: 2px solid #b52d1e;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-limpar-favoritos:hover {
+            background: #b52d1e;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .favoritos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="favoritos-container">
+        <div class="favoritos-header">
+            <h1>Meus Favoritos</h1>
+            <p>Produtos que você salvou para depois</p>
+        </div>
+
+        <div id="favoritos-conteudo"></div>
+    </main>
+
+    <script type="module">
+        import { 
+            obterFavoritos, 
+            toggleFavorito,
+            limparFavoritos,
+            formatarPreco,
+            inicializarFavoritos 
+        } from './js/favoritos.js';
+
+        function renderizarFavoritos() {
+            const container = document.getElementById('favoritos-conteudo');
+            const favoritos = obterFavoritos();
+
+            if (favoritos.length === 0) {
+                container.innerHTML = `
+                    <div class="favoritos-vazio">
+                        <h2>Nenhum favorito ainda</h2>
+                        <p>Adicione produtos aos favoritos clicando no ícone de coração</p>
+                        <a href="index.html#produtos" class="btn-continuar">Ver Produtos</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Botão limpar todos
+            let html = `
+                <button class="btn-limpar-favoritos" onclick="limparTodosFavoritos()">
+                    Limpar Todos os Favoritos
+                </button>
+                <div class="favoritos-grid">
+            `;
+
+            favoritos.forEach(item => {
+                const imagemSrc = item.imagem || 'imagens/produto-placeholder.jpg';
+                
+                html += `
+                    <div class="favorito-card">
+                        <img src="${imagemSrc}" 
+                             alt="${item.nome}" 
+                             class="favorito-imagem"
+                             onerror="this.src='imagens/produto-placeholder.jpg'">
+                        
+                        <div class="favorito-info">
+                            <h3 class="favorito-nome">${item.nome}</h3>
+                            <div class="favorito-preco">${formatarPreco(item.preco)}</div>
+                            
+                            <div class="favorito-acoes">
+                                <a href="produto-detalhes.html?id=${item.id}" class="btn-ver-produto">
+                                    Ver Produto
+                                </a>
+                                <button class="btn-remover-favorito" onclick="removerFavorito('${item.id}')">
+                                    Remover
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        window.removerFavorito = async function(produtoId) {
+            const resultado = await toggleFavorito(produtoId);
+            if (resultado.sucesso) {
+                renderizarFavoritos();
+            }
+        };
+
+        window.limparTodosFavoritos = function() {
+            if (confirm('Deseja remover todos os favoritos?')) {
+                limparFavoritos();
+                renderizarFavoritos();
+            }
+        };
+
+        // Inicializa
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarFavoritos();
+            renderizarFavoritos();
+        });
+
+        // Funções da navbar
+        import { auth } from './js/firebase.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { inicializarCarrinho } from './js/carrinho.js';
+
+        function verificarAdmin() {
+            const adminLogado = localStorage.getItem('adminLogado');
+            const btnPainelAdmin = document.getElementById('btn-painel-admin');
+            
+            if (adminLogado === 'true') {
+                btnPainelAdmin?.classList.add('mostrar');
+            } else {
+                btnPainelAdmin?.classList.remove('mostrar');
+            }
+        }
+
+        onAuthStateChanged(auth, () => {
+            verificarAdmin();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarCarrinho();
+            verificarAdmin();
+        });
+
+        window.buscarProdutos = function() {
+            const searchInput = document.getElementById('searchInput');
+            const termo = searchInput?.value.trim();
+            
+            if (!termo) return;
+            
+            window.location.href = `index.html?busca=${encodeURIComponent(termo)}`;
+        };
+
+        document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                buscarProdutos();
+            }
+        });
+
+        window.filtrarPorCategoria = function(categoria) {
+            window.location.href = `index.html?categoria=${encodeURIComponent(categoria)}`;
+        };
+
+        // Scroll navbar
+        const navbar = document.querySelector(".navbar");
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 80) {
+                navbar?.classList.add("scrolled");
+            } else {
+                navbar?.classList.remove("scrolled");
+            }
+        });
+    </script>
+</body>
+</html>

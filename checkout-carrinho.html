@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Compra - LofStore</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="js/navbar.js"></script>
+    
+    <style>
+        .checkout-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .checkout-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .checkout-header h1 {
+            color: #b52d1e;
+            margin-bottom: 10px;
+        }
+
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+        }
+
+        .card h2 {
+            color: #b52d1e;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #b52d1e;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            border: none;
+            outline: none;
+            background: none;
+            padding: 12px 0;
+            font-size: 16px;
+            width: 100%;
+            color: #333;
+            font-family: "Raleway", sans-serif;
+        }
+        
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #999;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+            padding: 12px 0;
+        }
+
+        .produto-resumo {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .produto-imagem-mini {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .produto-info-mini {
+            flex: 1;
+        }
+
+        .produto-nome-mini {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .produto-preco-mini {
+            color: #b52d1e;
+            font-weight: 700;
+        }
+
+        .produto-quantidade {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .resumo-valores {
+            padding: 20px 0;
+        }
+
+        .valor-linha {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            color: #666;
+        }
+
+        .valor-linha.total {
+            color: #b52d1e;
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding-top: 15px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .btn-finalizar {
+            width: 100%;
+            background: #b52d1e;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            height: 50px;
+        }
+
+        .btn-finalizar:hover {
+            background-color:#721c24 
+        }
+
+        .btn-finalizar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #b52d1e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sucesso-container {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .sucesso-container h2 {
+            color: #155724;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .sucesso-container p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .numero-pedido {
+            background: #f9f9f9;
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: 600;
+            color: #b52d1e;
+        }
+
+        .mensagem-pagamento {
+            background: #fde3e3;
+            border-left: 4px solid #f32121;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #d21919;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="checkout-container">
+        <div class="checkout-header">
+            <h1>Finalizar Compra</h1>
+            <p>Preencha os dados para concluir seu pedido</p>
+        </div>
+
+        <div id="formulario-checkout">
+            <div class="checkout-grid">
+                <!-- DADOS DO CLIENTE -->
+                <div class="card">
+                    <h2>Dados de Entrega</h2>
+                    <div id="message" class="message" style="display: none;"></div>
+                    
+                    <form id="form-checkout">
+                        <div class="form-group">
+                            <label for="nome">Nome Completo</label>
+                            <input type="text" id="nome" placeholder="Digite seu nome completo" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">E-mail</label>
+                            <input type="email" id="email" placeholder="seu@email.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="telefone">Telefone</label>
+                            <input type="tel" id="telefone" placeholder="(00) 00000-0000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endereco">Endereço Completo</label>
+                            <textarea id="endereco" placeholder="Rua, número, bairro, cidade, estado, CEP" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="observacoes">Observações (opcional)</label>
+                            <textarea id="observacoes" placeholder="Instruções especiais para entrega"></textarea>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- RESUMO DO PEDIDO -->
+                <div class="card">
+                    <h2>Resumo do Pedido</h2>
+                    <div id="produtos-resumo"></div>
+
+                    <div class="resumo-valores">
+                        <div class="valor-linha">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">R$ 0,00</span>
+                        </div>
+                        <div class="valor-linha">
+                            <span>Entrega:</span>
+                            <span id="entrega">Grátis</span>
+                        </div>
+                        <div class="valor-linha total">
+                            <span>Total:</span>
+                            <span id="total">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btn-finalizar" class="btn-finalizar">
+                        Finalizar Pedido
+                    </button>
+
+                    <div class="mensagem-pagamento">
+                        <p style="margin: 0;">
+                            Para efetivar o seu pagamento você será direcionado(a) ao Mercado Pago onde escolherá a forma de pagamento e concluirá tudo de forma 100% segura.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUCESSO -->
+        <div id="sucesso-container" class="sucesso-container">
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <h2>Pedido Realizado com Sucesso!</h2>
+                <p>Você será redirecionado para o Mercado Pago para concluir o pagamento.</p>
+                
+                <div class="numero-pedido" id="numero-pedido-final">
+                    Pedido: #
+                </div>
+
+                <p style="margin-top: 30px;">Obrigado por comprar na LofStore!</p>
+
+                <div style="display: flex; gap: 15px; margin-top: 30px; justify-content: center;">
+                    <a href="perfil.html" style="flex: 1; max-width: 200px; background: #b52d1e; color: white; padding: 12px; border-radius: 25px; text-decoration: none; text-align: center; font-weight: 600;">
+                        Ver Meus Pedidos
+                    </a>
+                    <a href="index.html" style="flex: 1; max-width: 200px; background: #666; color: white; padding: 12px; border-radius: 25px; text-decoration: none; text-align: center; font-weight: 600;">
+                        Continuar Comprando
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth, db } from './js/firebase.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { obterCarrinho, calcularTotal, formatarPreco, limparCarrinho } from './js/carrinho.js';
+
+        let usuarioAtual = null;
+
+        // =================== VERIFICA AUTENTICAÇÃO ===================
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                alert('Faça login para finalizar a compra');
+                window.location.href = 'login-usuario.html?redirect=checkout-carrinho';
+                return;
+            }
+
+            usuarioAtual = user;
+            await carregarDadosUsuario(user.uid);
+            exibirResumo();
+        });
+
+        // =================== CARREGA DADOS DO USUÁRIO ===================
+        async function carregarDadosUsuario(uid) {
+            try {
+                const userDoc = await getDoc(doc(db, "usuarios", uid));
+                
+                if (userDoc.exists()) {
+                    const dados = userDoc.data();
+                    document.getElementById('nome').value = dados.nome || '';
+                    document.getElementById('email').value = dados.email || '';
+                    document.getElementById('telefone').value = dados.telefone || '';
+                    document.getElementById('endereco').value = dados.endereco || '';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+            }
+        }
+
+        // =================== EXIBE RESUMO DO CARRINHO ===================
+        function exibirResumo() {
+            const carrinho = obterCarrinho();
+            
+            if (carrinho.length === 0) {
+                alert('Seu carrinho está vazio!');
+                window.location.href = 'index.html#produtos';
+                return;
+            }
+
+            const container = document.getElementById('produtos-resumo');
+            const subtotal = calcularTotal();
+
+            container.innerHTML = '';
+            carrinho.forEach(item => {
+                const imagemSrc = item.imagem || 'imagens/produto-placeholder.jpg';
+                
+                container.innerHTML += `
+                    <div class="produto-resumo">
+                        <img src="${imagemSrc}" 
+                             alt="${item.nome}" 
+                             class="produto-imagem-mini"
+                             onerror="this.src='imagens/produto-placeholder.jpg'">
+                        <div class="produto-info-mini">
+                            <div class="produto-nome-mini">${item.nome}</div>
+                            <div class="produto-quantidade">Qtd: ${item.quantidade}</div>
+                            <div class="produto-preco-mini">${formatarPreco(item.preco * item.quantidade)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('subtotal').textContent = formatarPreco(subtotal);
+            document.getElementById('total').textContent = formatarPreco(subtotal);
+        }
+
+        // =================== MÁSCARA DE TELEFONE ===================
+        document.getElementById('telefone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+            }
+            e.target.value = value;
+        });
+
+        // =================== FINALIZAÇÃO DO PEDIDO ===================
+        // ATENÇÃO: Os e-mails NÃO são enviados aqui.
+        // Eles são enviados automaticamente pelo webhook (api/webhook.js)
+        // somente após o pagamento ser APROVADO pelo Mercado Pago.
+        document.getElementById('btn-finalizar').addEventListener('click', async () => {
+            const nome = document.getElementById('nome').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefone = document.getElementById('telefone').value.trim();
+            const endereco = document.getElementById('endereco').value.trim();
+            const observacoes = document.getElementById('observacoes').value.trim();
+
+            const messageEl = document.getElementById('message');
+
+            // Validações
+            if (!nome || !email || !telefone || !endereco) {
+                messageEl.textContent = 'Preencha todos os campos obrigatórios';
+                messageEl.className = 'message error';
+                messageEl.style.display = 'block';
+                return;
+            }
+
+            const carrinho = obterCarrinho();
+            if (carrinho.length === 0) {
+                messageEl.textContent = 'Seu carrinho está vazio';
+                messageEl.className = 'message error';
+                messageEl.style.display = 'block';
+                return;
+            }
+
+            const btn = document.getElementById('btn-finalizar');
+            btn.innerHTML = '<div class="loading"></div> Processando...';
+            btn.disabled = true;
+
+            try {
+                // 1️⃣ Salva pedido no Firebase com status "aguardando"
+                const pedidoData = {
+                    usuarioId: usuarioAtual.uid,
+                    cliente: {
+                        nome: nome,
+                        email: email,
+                        telefone: telefone,
+                        endereco: endereco
+                    },
+                    itens: carrinho,
+                    total: calcularTotal(),
+                    observacoes: observacoes,
+                    status: 'pendente',
+                    statusPagamento: 'aguardando',
+                    criadoEm: new Date().toISOString()
+                };
+
+                console.log("💾 Salvando pedido no Firestore...");
+                const docRef = await addDoc(collection(db, "pedidos"), pedidoData);
+                console.log("✅ Pedido salvo:", docRef.id);
+
+                // 2️⃣ Chama o backend para criar o link de pagamento no Mercado Pago
+                // Os e-mails serão enviados pelo webhook SOMENTE após pagamento aprovado
+                console.log("📞 Criando link de pagamento...");
+                
+                const BACKEND_URL = 'https://lofstore-backend.vercel.app';
+                
+                const response = await fetch(`${BACKEND_URL}/criar-pagamento`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pedidoId: docRef.id,
+                        itens: carrinho,
+                        total: calcularTotal(),
+                        cliente: {
+                            nome: nome,
+                            email: email,
+                            telefone: telefone
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Erro ao criar pagamento');
+                }
+
+                console.log("✅ Link de pagamento criado:", data.link);
+
+                // 3️⃣ Limpa o carrinho
+                limparCarrinho();
+                
+                // 4️⃣ Redireciona para o Mercado Pago
+                console.log("🔄 Redirecionando para pagamento...");
+                window.location.href = data.link;
+
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                messageEl.textContent = 'Erro ao processar pedido: ' + error.message;
+                messageEl.className = 'message error';
+                messageEl.style.display = 'block';
+                btn.innerHTML = 'Finalizar Pedido';
+                btn.disabled = false;
+            }
+        });
+
+        // =================== SCROLL NAVBAR ===================
+        const navbar = document.querySelector(".navbar");
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 80) {
+                navbar.classList.add("scrolled");
+            } else {
+                navbar.classList.remove("scrolled");
+            }
+        });
+
+        // =================== INICIALIZA CARRINHO E ADMIN ===================
+        import { inicializarCarrinho } from './js/carrinho.js';
+
+        function verificarAdmin() {
+            const adminLogado = localStorage.getItem('adminLogado');
+            const btnPainelAdmin = document.getElementById('btn-painel-admin');
+            
+            if (btnPainelAdmin) {
+                if (adminLogado === 'true') {
+                    btnPainelAdmin.classList.add('mostrar');
+                } else {
+                    btnPainelAdmin.classList.remove('mostrar');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarCarrinho();
+            verificarAdmin();
+        });
+
+        // =================== BUSCA ===================
+        window.buscarProdutos = function() {
+            const searchInput = document.getElementById('searchInput');
+            const termo = searchInput.value.trim();
+            
+            if (!termo) return;
+            
+            if (!window.location.pathname.includes('index.html')) {
+                window.location.href = `index.html?busca=${encodeURIComponent(termo)}`;
+            }
+        };
+
+        document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                buscarProdutos();
+            }
+        });
+
+        // =================== FILTRAR CATEGORIA ===================
+        window.filtrarPorCategoria = function(categoria) {
+            if (!window.location.pathname.includes('index.html')) {
+                window.location.href = `index.html?categoria=${encodeURIComponent(categoria)}`;
+            }
+        };
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Compra - LofStore</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="js/navbar.js"></script>
+    <style>
+        .checkout-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .checkout-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .checkout-header h1 {
+            color: #b52d1e;
+            margin-bottom: 10px;
+        }
+
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #b52d1e;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: "Raleway", sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #b52d1e;
+            outline: none;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .produto-resumo {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .produto-imagem-mini {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .produto-info-mini {
+            flex: 1;
+        }
+
+        .produto-nome-mini {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .produto-preco-mini {
+            color: #b52d1e;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .resumo-valores {
+            padding: 20px 0;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .valor-linha {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            color: #666;
+        }
+
+        .valor-linha.total {
+            color: #b52d1e;
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding-top: 15px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .btn-finalizar {
+            width: 100%;
+            background: linear-gradient(135deg, #b52d1e 0%, #d63a2b 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-finalizar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(181, 45, 30, 0.4);
+        }
+
+        .btn-finalizar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #b52d1e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sucesso-container {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .sucesso-container h2 {
+            color: #155724;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .sucesso-container p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .numero-pedido {
+            background: #f9f9f9;
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: 600;
+            color: #b52d1e;
+        }
+
+        .mensagem-privacidade {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #1976D2;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="checkout-container">
+        <div class="checkout-header">
+            <h1>Finalizar Compra</h1>
+            <p>Preencha os dados para concluir seu pedido</p>
+        </div>
+
+        <div id="formulario-checkout">
+            <div class="checkout-grid">
+                <!-- DADOS DO CLIENTE -->
+                <div class="card">
+                    <h2>Dados de Entrega</h2>
+                    <div id="message" class="message" style="display: none;"></div>
+                    
+                    <form id="form-checkout">
+                        <div class="form-group">
+                            <label for="nome">Nome Completo *</label>
+                            <input type="text" 
+                                   id="nome" 
+                                   required 
+                                   minlength="2"
+                                   maxlength="100"
+                                   placeholder="João Silva"
+                                   autocomplete="name">
+                            <small>Apenas letras e espaços</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">E-mail *</label>
+                            <input type="email" 
+                                   id="email" 
+                                   required
+                                   maxlength="100"
+                                   placeholder="seu@email.com"
+                                   autocomplete="email">
+                            <small>Use um e-mail válido</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="telefone">Telefone *</label>
+                            <input type="tel" 
+                                   id="telefone" 
+                                   required 
+                                   minlength="14"
+                                   maxlength="15"
+                                   placeholder="(00) 00000-0000"
+                                   autocomplete="tel">
+                            <small>Com DDD</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endereco">Endereço Completo *</label>
+                            <textarea id="endereco" 
+                                      required 
+                                      minlength="10"
+                                      maxlength="500"
+                                      placeholder="Rua, número, bairro, cidade, estado, CEP"
+                                      autocomplete="street-address"></textarea>
+                            <small>Mínimo 10 caracteres</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="observacoes">Observações (opcional)</label>
+                            <textarea id="observacoes" 
+                                      maxlength="1000"
+                                      placeholder="Instruções especiais para entrega"></textarea>
+                        </div>
+
+                        <!-- MENSAGEM DE PRIVACIDADE -->
+                        <div class="mensagem-privacidade">
+                            <p style="margin: 0;">
+                                <strong>Privacidade:</strong> Seus dados são usados apenas para processar seu pedido. 
+                                Não compartilhamos com terceiros.
+                            </p>
+                        </div>
+
+                        <small style="display: block; margin-top: 10px;">* Campos obrigatórios</small>
+                    </form>
+                </div>
+
+                <!-- RESUMO DO PEDIDO -->
+                <div class="card">
+                    <h2>Resumo do Pedido</h2>
+                    <div id="produtos-resumo"></div>
+
+                    <div class="resumo-valores">
+                        <div class="valor-linha">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">R$ 0,00</span>
+                        </div>
+                        <div class="valor-linha">
+                            <span>Entrega:</span>
+                            <span id="entrega">Grátis</span>
+                        </div>
+                        <div class="valor-linha total">
+                            <span>Total:</span>
+                            <span id="total">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btn-finalizar" class="btn-finalizar">
+                        Finalizar Pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUCESSO -->
+        <div id="sucesso-container" class="sucesso-container">
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <h2>Pedido Realizado com Sucesso!</h2>
+                <p>Seu pedido foi confirmado e você receberá um e-mail com os detalhes.</p>
+                
+                <div class="numero-pedido" id="numero-pedido-final">
+                    Pedido: #
+                </div>
+
+                <p style="margin-top: 30px;">Obrigado por comprar na LofStore!</p>
+
+                <div style="display: flex; gap: 15px; margin-top: 30px; justify-content: center;">
+                    <a href="perfil.html" style="flex: 1; max-width: 200px; background: #b52d1e; color: white; padding: 12px; border-radius: 25px; text-decoration: none; text-align: center; font-weight: 600;">
+                        Ver Meus Pedidos
+                    </a>
+                    <a href="index.html" style="flex: 1; max-width: 200px; background: #666; color: white; padding: 12px; border-radius: 25px; text-decoration: none; text-align: center; font-weight: 600;">
+                        Continuar Comprando
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth, db } from './js/firebase.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        
+        // IMPORTAÇÃO DO FORMSPREE
+        import { enviarEmailsPedido } from './js/email-service-formspree.js';
+
+        let usuarioAtual = null;
+        let produtoAtual = null;
+
+        // =================== VALIDAÇÕES EM TEMPO REAL ===================
+        
+        // Máscara de telefone
+        const telefoneInput = document.getElementById('telefone');
+        telefoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+            }
+            e.target.value = value;
+        });
+
+        // Validação de nome
+        const nomeInput = document.getElementById('nome');
+        nomeInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s]/g, '');
+        });
+
+        // =================== FUNÇÕES DE VALIDAÇÃO ===================
+        
+        function validarFormulario() {
+            const nome = document.getElementById('nome').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefone = document.getElementById('telefone').value.trim();
+            const endereco = document.getElementById('endereco').value.trim();
+
+            if (nome.length < 2 || nome.length > 100) {
+                return { valido: false, mensagem: 'Nome deve ter entre 2 e 100 caracteres' };
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return { valido: false, mensagem: 'E-mail inválido' };
+            }
+
+            const telefoneLimpo = telefone.replace(/\D/g, '');
+            if (telefoneLimpo.length < 10 || telefoneLimpo.length > 11) {
+                return { valido: false, mensagem: 'Telefone inválido' };
+            }
+
+            if (endereco.length < 10 || endereco.length > 500) {
+                return { valido: false, mensagem: 'Endereço deve ter entre 10 e 500 caracteres' };
+            }
+
+            return { valido: true };
+        }
+
+        // =================== INICIALIZAÇÃO ===================
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                alert('Faça login para finalizar a compra');
+                window.location.href = 'login-usuario.html';
+                return;
+            }
+
+            usuarioAtual = user;
+            await carregarDadosUsuario(user.uid);
+        });
+
+        async function carregarDadosUsuario(uid) {
+            try {
+                const userDoc = await getDoc(doc(db, "usuarios", uid));
+                
+                if (userDoc.exists()) {
+                    const dados = userDoc.data();
+                    document.getElementById('nome').value = dados.nome || '';
+                    document.getElementById('email').value = dados.email || '';
+                    document.getElementById('telefone').value = dados.telefone || '';
+                    document.getElementById('endereco').value = dados.endereco || '';
+                }
+
+                await carregarProduto();
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+            }
+        }
+
+        function getProdutoFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('produto');
+        }
+
+        async function carregarProduto() {
+            const produtoId = getProdutoFromURL();
+            
+            if (!produtoId) {
+                alert('Produto não encontrado');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const produtoDoc = await getDoc(doc(db, "perfumes", produtoId));
+                
+                if (!produtoDoc.exists()) {
+                    alert('Produto não encontrado');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                produtoAtual = { id: produtoDoc.id, ...produtoDoc.data() };
+                exibirResumo();
+            } catch (error) {
+                console.error('Erro ao carregar produto:', error);
+                alert('Erro ao carregar produto');
+            }
+        }
+
+        function exibirResumo() {
+            const container = document.getElementById('produtos-resumo');
+            const subtotal = produtoAtual.preco || 0;
+
+            const imagemSrc = produtoAtual.imagem || 'imagens/produto-placeholder.jpg';
+
+            container.innerHTML = `
+                <div class="produto-resumo">
+                    <img src="${imagemSrc}" 
+                         alt="${produtoAtual.nome}" 
+                         class="produto-imagem-mini"
+                         onerror="this.src='imagens/produto-placeholder.jpg'">
+                    <div class="produto-info-mini">
+                        <div class="produto-nome-mini">${produtoAtual.nome}</div>
+                        <div class="produto-preco-mini">R$ ${subtotal.toFixed(2)}</div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('subtotal').textContent = `R$ ${subtotal.toFixed(2)}`;
+            document.getElementById('total').textContent = `R$ ${subtotal.toFixed(2)}`;
+        }
+
+        // =================== FINALIZAR PEDIDO COM FORMSPREE ===================
+        document.getElementById('btn-finalizar').addEventListener('click', async () => {
+            const validacao = validarFormulario();
+            if (!validacao.valido) {
+                showMessage(validacao.mensagem, 'error');
+                return;
+            }
+
+            const nome = document.getElementById('nome').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefone = document.getElementById('telefone').value.trim();
+            const endereco = document.getElementById('endereco').value.trim();
+            const observacoes = document.getElementById('observacoes').value.trim();
+
+            const btn = document.getElementById('btn-finalizar');
+            btn.innerHTML = '<div class="loading"></div> Processando...';
+            btn.disabled = true;
+
+            try {
+                const pedidoData = {
+                    usuarioId: usuarioAtual.uid,
+                    cliente: {
+                        nome: nome,
+                        email: email,
+                        telefone: telefone,
+                        endereco: endereco
+                    },
+                    itens: [{
+                        produtoId: produtoAtual.id,
+                        nome: produtoAtual.nome,
+                        preco: produtoAtual.preco,
+                        imagem: produtoAtual.imagem || '',
+                        quantidade: 1
+                    }],
+                    total: produtoAtual.preco,
+                    observacoes: observacoes,
+                    status: 'pendente',
+                    criadoEm: new Date().toISOString()
+                };
+
+                console.log("💾 Salvando pedido no Firestore...");
+                const docRef = await addDoc(collection(db, "pedidos"), pedidoData);
+
+                // 🔥 ENVIA E-MAILS VIA FORMSPREE
+                console.log("📧 Enviando e-mails via Formspree...");
+                const emailResult = await enviarEmailsPedido(pedidoData, docRef.id);
+                
+                if (emailResult.success) {
+                    console.log('✅ E-mails enviados com sucesso!');
+                } else {
+                    console.warn('⚠️ Erro ao enviar e-mails:', emailResult.message);
+                }
+
+                document.getElementById('formulario-checkout').style.display = 'none';
+                document.getElementById('sucesso-container').style.display = 'block';
+                document.getElementById('numero-pedido-final').textContent = `Pedido: #${docRef.id.substring(0, 8)}`;
+
+            } catch (error) {
+                console.error('Erro ao finalizar pedido:', error);
+                showMessage('Erro ao processar pedido: ' + error.message, 'error');
+                btn.innerHTML = 'Finalizar Pedido';
+                btn.disabled = false;
+            }
+        });
+
+        function showMessage(text, type = 'info') {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+            
+            if (type !== 'info') {
+                setTimeout(() => {
+                    messageEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
